@@ -1,0 +1,25 @@
+"0",""
+"0","unemployment_df <- read_csv(""unemployment.csv"", skip = 4)"
+"2","New names:"
+"2","[1mRows: [22m[34m263[39m [1mColumns: [22m[34m66[39m"
+"2","[36m──[39m [1mColumn specification[22m [36m────────────────────────────────────────────────────────────────────────────────────────[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m  (4): Country Name, Country Code, Indicator Name, Indicator Code
+[32mdbl[39m (30): 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 20...
+[33mlgl[39m (32): 1960, 1961, 1962, 1963, 1964, 1965, 1966, 1967, 1968, 1969, 1970, 1971, 1972, 1973, 1974, 1975, 19..."
+"2","
+[36mℹ[39m Use `spec()` to retrieve the full column specification for this data.
+[36mℹ[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."
+"0","country_name <- unemployment_df %>%"
+"0","  select(`Country Name`,`Country Code`)"
+"0",""
+"0","indicator_data <- unemployment_df %>%"
+"0","  pivot_longer("
+"0","    cols = matches(""[0-9]""),"
+"0","    names_to = ""Year"","
+"0","    values_to = ""Ratio"""
+"0","  ) %>%"
+"0","  select(`Country Code`,Year,Ratio)"
+"0",""
+"0",""
+"0","country_name"

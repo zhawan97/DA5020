@@ -1,0 +1,4 @@
+"0",""
+"0","# Count rows in movie_info"
+"0","rs2 <- dbGetQuery(db,sqlCmd2)"
+"0","print(rs2)"

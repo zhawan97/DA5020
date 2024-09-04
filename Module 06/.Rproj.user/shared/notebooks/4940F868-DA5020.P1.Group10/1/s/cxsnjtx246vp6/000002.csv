@@ -1,0 +1,11 @@
+"0","```r
+# Changing to correct data type
+admissions_df <- admissions_df |> 
+  mutate(year = as.numeric(year),
+         county_of_program_location = as.factor(county_of_program_location),
+         program_category = as.factor(program_category),
+         service_type = as.factor(service_type),
+         age_group = as.factor(age_group),
+         admissions = as.numeric(admissions)
+         )
+```"

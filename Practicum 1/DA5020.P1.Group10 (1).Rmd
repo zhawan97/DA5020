@@ -1,0 +1,348 @@
+---
+title: 'Practicum 1: Part 2'
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+# **Part 1**
+
+## #1
+
+```{r}
+# Create the Dataframe
+doctors_df <- data.frame(
+  doctor_type = c("PCP", "Psychiatrist", "Surgeon", "Anesthesia"),
+  doctor_lastname = c("Smith", "Dame", "Jones", "Zayas"),
+  location = c("MA", "ME", "NH", "VT"),
+  AVG_Rating = c(7, 9, 8, 9)
+)
+
+# Print the dataframe
+print(doctors_df)
+```
+
+
+## #2
+
+"Smith" is selected in row 1 column 2.
+
+```{r}
+print(doctors_df[1, 2])
+```
+
+The Psychiatrist, Surgeon, and Anesthesia rows are selected in their entirety.
+
+```{r}
+print(doctors_df[2:4,])
+```
+
+The AVG_Rating data is selected.
+
+```{r}
+print(doctors_df[, ncol(doctors_df)])
+```
+
+
+## #3
+
+I chose to plot weight on the x axis and mpg on the y axis. I inferred that heavier cars would be less fuel efficient than lighter ones and wanted to test that hypothesis. Coloring the points by the number of cylinders provides additional insight into whether that adds to the weight and in turn affects the mpg.
+
+```{r}
+library(ggplot2)
+
+ggplot(mtcars, aes(x = wt, y = mpg, color = as.factor(cyl))) +
+  geom_point() +
+  labs(title = "Scatterplot of MPG vs. Weight by # of Cylinders",
+       x = "Weight (1000 lbs",
+       y = "Miles per Gallon",
+       color = "# of Cylinders")
+```
+
+
+## #4
+
+I picked the same variables as #3 based on the same hypothesis that heavier vehicles are likely less fuel efficient, which is a practical concern both for consumers and for manufacturers. The pearson coefficient, in general, quantifies the strength and direction of a linear relationship. In this case, we are expecting that weight and mpg are negatively correlated (higher weight is lower mpg). A pearson coefficient of -1 would imply a perfect negative linear relationship. We calculated a value of -0.87 for the correlation of wt and mpg which supports our original hypothesis.
+
+```{r}
+# Generate summary stats
+summary(mtcars)
+
+# Caclulate pearson correlation coefficient on same variables as #3
+cor(mtcars$mpg, mtcars$wt, method = "pearson")
+```
+
+
+# Part 2
+
+
+## Question 1 
+
+Download XML file and load as admissions_df
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(XML)
+
+# Adding URL to a variable
+file_url <- "http://data.ny.gov/api/views/ngbt-9rwf/rows.xml"
+
+# Downloading file to admissions.xml
+download.file(file_url, destfile = "admissions.xml")
+
+# Parsing XML file
+xmlfile <- xmlParse("admissions.xml")
+
+# Getting root of XML file
+xmltop <- xmlRoot(xmlfile)
+
+# Accessing the first element of the root into a dataframe
+admissions_df <- xmlToDataFrame(xmltop[[1]])
+```
+
+
+## Question 2
+
+### Evaluating data
+
+The data has 7 variables which are year, county location, program category, service type, age group, primary substance use, and admissions numbers, with a total of 99,367 observations. 
+```{r}
+str(admissions_df)
+```
+
+
+### Preparation of data
+Some preparation steps that can be performed is to change their data type to their respective types. 
+year and admissions have a chr data type and is changed to numeric data type because they both are number types but were represented as chr type. 
+county_of_program_location, program_category, service_type, age_group have chr type but were changed to factor type because they only have a set number of categories that they can be part of. 
+```{r results='hide'}
+# Changing to correct data type
+admissions_df <- admissions_df |> 
+  mutate(year = as.numeric(year),
+         county_of_program_location = as.factor(county_of_program_location),
+         program_category = as.factor(program_category),
+         service_type = as.factor(service_type),
+         age_group = as.factor(age_group),
+         admissions = as.numeric(admissions)
+         )
+```
+
+
+### Summary Statistics
+Standard deviation - 135.76
+Mean - 44.25
+Median - 7
+Variance - 11.65
+
+```{r}
+
+# ADMISSIONS ANALYSIS
+
+admissions_sd <- sd(admissions_df$admissions, na.rm = TRUE)
+admissions_mean <- mean(admissions_df$admissions, na.rm = TRUE)
+admissions_median <- median(admissions_df$admissions, na.rm = TRUE)
+admissions_var <- sqrt(admissions_sd)
+
+# Assign z-scores
+
+admissions_df$admissions_z <- abs((admissions_mean - admissions_df$admissions)/admissions_sd)
+admissions_outliers <- admissions_df %>%
+  filter(admissions_z > 1.5)
+
+admissions_outliers
+```
+
+
+
+### Distribution of Data
+
+To analyze the data I decided to split up the data by 4 categories which are the columns:
+county_of_program_location
+age_group
+program_category
+primary_substance_group
+
+```{r}
+# COUNTY ANALYSIS
+
+admissions_by_county <- admissions_df %>%
+  group_by(county_of_program_location) %>%
+  select(county_of_program_location, admissions) %>%
+  arrange(county_of_program_location, .locale = "en")
+
+admissions_by_county %>%
+  count(county_of_program_location, wt = admissions) %>%
+  arrange(county_of_program_location, .locale = "en")
+
+admissions_county_plot <- ggplot(admissions_by_county, aes(x = county_of_program_location, y = admissions)) + geom_bar(stat = "identity") + labs(x = "County", y = "Admissions", title = "Admissions By County") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# AGE GROUP ANALYSIS
+
+admissions_by_age <- admissions_df %>%
+  group_by(age_group) %>%
+  select(age_group,admissions) %>%
+  arrange(age_group, .locale = "en")
+
+admissions_by_age %>%
+  count(age_group) %>%
+  arrange(age_group, .locale = "en")
+
+admissions_age_plot <- ggplot(admissions_by_age, aes(x = age_group, y = admissions)) + geom_bar(stat = "identity") + labs(x = "Age Group", y = "Admssions", title = "Admissions By Age Group")
+
+
+# PROGRAM CATEGORY ANALYSIS
+
+admissions_by_program <- admissions_df %>%
+  group_by(program_category) %>%
+  select(program_category, admissions) %>%
+  arrange(program_category, .locale = "en")
+
+admissions_by_program %>%
+  count(program_category, wt = admissions) %>%
+  arrange(program_category, .locale = "en")
+
+admissions_program_plot <- ggplot(admissions_by_program, aes(x = program_category, y = admissions)) + geom_bar(stat = "identity") + labs(x = "Program Category", y = "Admissions", title = "Admissions by Program")
+
+
+# PRIMARY SUBSTANCE ANALYSIS
+
+admissions_by_substance <- admissions_df %>%
+  group_by(primary_substance_group) %>%
+  select(primary_substance_group,admissions) %>%
+  arrange(primary_substance_group, .locale = "en")
+
+admissions_by_substance %>%
+  count(primary_substance_group, wt = admissions) %>%
+  arrange(primary_substance_group, .locale = "en")
+
+admissions_substance_plot <- ggplot(admissions_by_substance, aes(x = primary_substance_group, y = admissions)) + geom_bar(stat = "identity") + labs(x = "Primary Substance", y = "Admssions", title = "Admissions By Substance")
+
+admissions_age_plot
+admissions_county_plot
+admissions_program_plot
+admissions_county_plot
+```
+
+## Question 3
+### Creating county dataframe 
+Selecting county_of_program_location and renaming the column to county_name. Keeping distinct rows from the selected column. Adding a column called county_code with respective codes for each county. 
+```{r}
+county <- admissions_df |> 
+  select(county_of_program_location) |>
+  distinct() |> 
+  mutate(county_code = c("AL", "AG", "NY", "BM", "CA", "CY", "CH", "CM",
+                         "CN", "CL", "CO", "CR", "DE", "DU", "ER", "ES",
+                         "FR", "FU", "GE", "GR", "HE", "JE", "NY", "LE", 
+                         "LI", "MA", "MO", "MG", "NA", "NY", "NI", "ON",
+                         "OD", "OT", "OR", "OL", "OS", "OG", "PU", "NY",
+                         "RE", "NY", "RO", "SL", "SA", "SC", "SH", "SY",
+                         "SE", "ST", "SU", "SV", "TI", "TO", "UL", "WR",
+                         "WS", "WA","WE", "WY", "YA")) |> 
+  relocate(county_code, .before = county_of_program_location)
+```
+
+### Creating program_category dataframe
+Selecting the program_category column from admissions_df data frame. Removing  duplicate values and create a new column called program_code which selects the first two letters from the program_category column to use as program code. 
+```{r}
+program_category_df <- admissions_df |> 
+  select(program_category) |> 
+  distinct()|> 
+  mutate(program_code = str_extract(program_category, "^[A-Z][a-z]{1}"),
+         program_code = toupper(program_code)) |> 
+  relocate(program_code, .before = program_category)
+```
+
+### Creating primary_substance_group dataframe
+Selecting primary_substance_group from admission_df data frame. Keeping only distinct values into data frame. Then creating substance_code column with the first letter of each substance as a code. 
+```{r}
+primary_substance_group_df <- admissions_df |> 
+  select(primary_substance_group) |> 
+  distinct() |> 
+  mutate(substance_code = str_extract(primary_substance_group, "^[A-Z]")) |> 
+  relocate(substance_code, .before = primary_substance_group)
+```
+
+### Creating admission_data dataframe
+Utilize mutate function to match values from admissions_data to the values from the smaller dataframes and replcae them.
+```{r}
+# Create admissions_data df as a copy of admissions_df
+admissions_data <- admissions_df %>%
+  select(!admissions_z)
+
+# Replace values in county_of_program_location with county codes from county_df
+admissions_data <- admissions_data %>%
+  mutate(county_of_program_location = ifelse(county_of_program_location %in% county$county_of_program_location, county$county_code[match(county_of_program_location, county$county_of_program_location)], county_of_program_location))
+
+# Replace values in program_category with program codes from program_category_df
+admissions_data <- admissions_data %>%
+  mutate(program_category = ifelse(program_category %in% program_category_df$program_category, program_category_df$program_code[match(program_category, program_category_df$program_category)], program_category))
+
+# Replace values in primary_substance_group with substance codes from primary_substance_group_df
+admissions_data <- admissions_data %>%
+  mutate(primary_substance_group = ifelse(primary_substance_group %in% primary_substance_group_df$primary_substance_group, primary_substance_group_df$substance_code[match(primary_substance_group, primary_substance_group_df$primary_substance_group)], primary_substance_group))
+```
+
+
+## Question 4 
+The line chart shows the admissions number for each year starting from 2007 to 2021. Between 2007 and 2008 there is a slight decrease in the admission numbers. Then admissions start increasing until 2012 with a slight dip between 2010 and 2011. After 2012, admission numbers steadily decline until 2016. From year 2016 a very high number of admission occurs with the maximum admission of 6960 people in the year 2019. Afterwards, there is a sharp decline that could be due to the pandemic that occurred in 2020.  
+
+```{r}
+# Function that plots year and admission year
+annualAdmissions <- function() {
+  admissions_df |>  
+    group_by(year) |> 
+    summarise(admissions_per_year = n()) |> 
+    ggplot(aes(year, admissions_per_year)) + geom_line() +
+    geom_text(x = 2020.5, y = 6900, label = "Max \n(year 2019)", color = "grey40") +
+    geom_vline(xintercept = 2019, color = "grey40", linetype = 2) +
+    annotate("curve", x = 2020.5, y = 6930, xend = 2019.2, yend = 6960, 
+             arrow = arrow(length = unit(0.2, "cm"), type = "closed"), color = "grey40") +
+    labs(title = "Line chart of admissions per year", x = "Year", y = "Number of Admissions",
+         caption = "Visualization of admissions per year")
+}
+```
+
+## Question 5 
+The chart shows the counties that had the most admissions by percentage. New York county had the most admissions accounting for 0.122%, followed by Suffolk county with 0.095%, Queens county with 0.090%, Eerie county with 0.0864%, and Dutchess county with 0.0862%.
+
+```{r}
+# Getting total number of admissions 
+total_admissions <- sum(admissions_df$admissions)
+
+# Grouping by county and adding a percentage column to make a bar graph showing the top 5 counties
+admissions_df |> 
+  group_by(county_of_program_location) |> 
+  summarise(admissions_per_county = n()) |>
+  mutate(admissions_percentage = (admissions_per_county / total_admissions) * 100) |> 
+  arrange(desc(admissions_percentage)) |> 
+  slice_head(n = 5) |> 
+  ggplot(aes(county_of_program_location ,admissions_percentage)) + geom_col()  +
+  labs(title = "5 counties with most admissions percentage", x = "County", y = "Admission percentage",
+       caption = "Shows counties that had the most admission by percentage")
+  
+```
+
+## Question 6 
+The most used substance in "under 18" and "18 through 24" age group is Marijuana with 275 and 998 admissions respectively. For the 25 through 34 age group, Alcohol is the most consumed with 937 admissions. The 35 through 44 age group primary substance is alcohol with 941 admissions. Primary substance use for age group 45 through 54 is alcohol with 940 admissions, and age group 55 and older's primary substance is alcohol with 933 admissions. 
+
+```{r}
+# Selecting for the word "Rehab" in service_type column
+rehab_facilities <- admissions_df |> 
+  filter(str_detect(admissions_df$service_type, "\\bRehab")) |> 
+  group_by(age_group, primary_substance_group) |> 
+  count()
+
+# Getting the number of users for the most used substance
+top_substances_numbers <- rehab_facilities |> 
+  group_by(age_group) |> summarise(top = max(n))
+
+# Filtering for the substance that has the highest number of uses
+rehab_facilities |> 
+  filter(n %in% top_substances_numbers$top) |> 
+  ggplot(aes(age_group, n)) + geom_col() +
+  labs(title = "Substance use admissions by age group", x = "Age group", 
+       y = "Admissions", caption = "Visualizing of age group and admissions") 
+```
+

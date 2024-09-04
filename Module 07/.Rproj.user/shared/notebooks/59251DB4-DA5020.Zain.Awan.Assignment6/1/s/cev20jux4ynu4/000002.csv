@@ -1,0 +1,23 @@
+"0","```r
+# Define Query to search for action movies. I could not get it to work with the = operator and wildcard so I used LIKE
+sqlCmd4 <- \"SELECT * FROM movie_info WHERE Genre LIKE '%Action%'\"
+rs3 <- dbGetQuery(db, sqlCmd4)
+
+# Return the summary statistics in order to get min and max of IMDB_Rating
+summary(rs3)
+```"
+"1","      ID            Series_Title       Release_Year         Runtime             Genre            IMDB_Rating   
+ Length:189         Length:189         Length:189         Length:189         Length:189         Min.   :7.600  
+ Class :character   Class :character   Class :character   Class :character   Class :character   1st Qu.:7.700  
+ Mode  :character   Mode  :character   Mode  :character   Mode  :character   Mode  :character   Median :7.900  
+                                                                                                Mean   :7.949  
+                                                                                                3rd Qu.:8.100  
+                                                                                                Max.   :9.000  
+  Director_ID        Gross          
+ Min.   :  4.0   Min.   :        0  
+ 1st Qu.:117.0   1st Qu.:   977375  
+ Median :243.0   Median : 43000000  
+ Mean   :253.6   Mean   :116578456  
+ 3rd Qu.:391.0   3rd Qu.:188373161  
+ Max.   :546.0   Max.   :936662225  
+"

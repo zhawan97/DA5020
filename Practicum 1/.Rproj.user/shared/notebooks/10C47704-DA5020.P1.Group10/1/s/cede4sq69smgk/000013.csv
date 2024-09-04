@@ -1,0 +1,23 @@
+"0","library(ggplot2)"
+"0","library(tidyverse)"
+"0","library(XML)"
+"0",""
+"0","# Adding URL to a variable"
+"0","file_url <- ""http://data.ny.gov/api/views/ngbt-9rwf/rows.xml"""
+"0",""
+"0","# Downloading file to admissions.xml"
+"0","download.file(file_url, destfile = ""admissions.xml"")"
+"2","trying URL 'http://data.ny.gov/api/views/ngbt-9rwf/rows.xml'
+"
+"2","downloaded 44.0 MB
+
+"
+"0","# Parsing XML file"
+"0","xmlfile <- xmlParse(""admissions.xml"")"
+"0",""
+"0","# Getting root of XML file"
+"0","xmltop <- xmlRoot(xmlfile)"
+"0",""
+"0","# Accessing the first element of the root into a dataframe"
+"0","admissions_df <- xmlToDataFrame(xmltop[[1]])"
+"0","View(admissions_df)"

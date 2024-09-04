@@ -1,0 +1,5 @@
+"0","#Filter outliers"
+"0","tripdata_df2 <- tripdata_df %>%"
+"0","  filter(trip_distance_z < 3)"
+"0",""
+"0","ggplot(tripdata_df2, aes(x=tripdata_df2$payment_type, y=tripdata_df2$trip_distance)) + geom_bar(stat = ""identity"") + labs(title = ""Distance by Payment Type"") + labs(x=""Payment Type"", y=""Trip Distance"")"

@@ -1,0 +1,78 @@
+---
+title: "Module 02 hw"
+output:
+  html_document:
+    df_print: paged
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Load global environment
+
+```{r}
+library(ggplot2)
+library(dplyr)
+ms <- msleep
+```
+
+
+## Question 2
+
+Removing NA was not specified so it was included. The data was piped into count() which returned the total number of unique values in the column. mutate() is used to add calculate the percentage of each value in the data. Finally, we select the vore and proportion column to create the bar graph.
+```{r}
+vorePercentage <- ms %>%
+  count(vore) %>%
+  mutate(proportion = n / sum(n)) %>%
+  select(vore, proportion)
+
+ggplot(vorePercentage, aes(x = vore, y = proportion)) + geom_bar(stat = "identity")
+
+```
+
+
+## Question 3
+
+The mean of sleep_total for omnivores is 10.925
+```{r}
+just_omni <- ms %>%
+  filter(vore == "omni")
+mean(just_omni$sleep_total)
+```
+
+
+## Question 4
+
+Body weight is positively correlatd with brain weight, i.e. as body weight increases brain weight tends to increase as well.
+```{r}
+ggplot(ms, aes(x = bodywt, y = brainwt)) + geom_point() + scale_x_log10() + scale_y_log10()
+```
+
+## Question 5
+
+cor() returns a coefficient of 0.93 which is very close to 1. This supports the assumption from the previous question.
+```{r}
+wt_cor <- ms %>%
+  select(bodywt, brainwt) %>%
+  na.omit()
+cor(wt_cor)
+```
+
+## Question 6
+
+I created a new column called z which contains the z scores of each row. I filtered the data to get only the outliers which was defined as having a z score greater than 1.5. I determined that the total number of outliers is 13 with the length() function.
+To display the names and sleep_total of the outliers, I piped the data into select() which gave me the names, sleep_total, and z rows. I filtered this data by rows with z > 1.5 and then removed the z column to display the final product.
+```{r}
+sd <- sd(ms$sleep_total)
+mn <- mean(ms$sleep_total)
+ms$z <- abs((mn - ms$sleep_total)/sd)
+outliers <- which(ms$z > 1.5)
+n_outliers <- length(outliers)
+n_outliers
+
+ms_outliers <- ms %>%
+  select(name, sleep_total, z) %>%
+  filter(z > 1.5) %>%
+  select(-z)
+head(ms_outliers, 13)
+```
+

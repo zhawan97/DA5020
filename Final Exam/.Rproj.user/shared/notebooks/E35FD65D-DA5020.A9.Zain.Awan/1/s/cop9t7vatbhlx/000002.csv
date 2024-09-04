@@ -1,0 +1,24 @@
+"0","```r
+# Exponential Smoothing with alpha = 0.7 and data starting from 2008 to 2018
+a <- 0.7
+df <- passenger_counts %>%
+  filter(activity_period > 200800 & activity_period < 202000)
+df$activity_period <- as.numeric(df$activity_period)
+df$total_passengers <- as.numeric(df$total_passengers)
+
+df <- as.data.frame(df)
+
+df$Ft <- 0
+df$E <- 0
+df$Ft[1] <- df[1,2]
+
+for (i in 2:nrow(df)) {
+  df$Ft[i] <- as.numeric(df$Ft[i-1]) + as.numeric(a*df$E[i-1])
+  df$E[i] <- abs(df[i,2] - df$Ft[i])
+}
+
+percent_error <- df$E[12]/df$total_passengers[12] * 100
+print(percent_error)
+```"
+"1","[1] 1.097145
+"

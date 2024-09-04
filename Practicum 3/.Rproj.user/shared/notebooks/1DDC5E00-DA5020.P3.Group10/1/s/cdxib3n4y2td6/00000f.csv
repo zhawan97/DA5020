@@ -1,0 +1,4 @@
+"0","taxi_data_encoded <- taxi_data_clean %>%"
+"0","  mutate(across(.cols = where(is.character), .fns = ~as.integer(as.factor(.))))"
+"0",""
+"0","head(taxi_data_encoded)"

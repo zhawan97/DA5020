@@ -1,0 +1,7 @@
+"0","```r
+library(RSQLite)
+library(tidyverse)
+library(ggplot2)
+
+db <- dbConnect(SQLite(), \"imdb.db\")
+```"

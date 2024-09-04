@@ -1,0 +1,5 @@
+"0","# Load libraries and datasets"
+"0","library(openintro)"
+"0","library(psych)"
+"0","library(dplyr)"
+"0","data(ncbirths)"

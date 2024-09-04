@@ -1,0 +1,12 @@
+"0","```r
+# Create the Dataframe
+doctors_df <- data.frame(
+  doctor_type = c(\"PCP\", \"Psychiatrist\", \"Surgeon\", \"Anesthesia\"),
+  doctor_lastname = c(\"Smith\", \"Dame\", \"Jones\", \"Zayas\"),
+  location = c(\"MA\", \"ME\", \"NH\", \"VT\"),
+  AVG_Rating = c(7, 9, 8, 9)
+)
+
+# Print the dataframe
+print(doctors_df)
+```"

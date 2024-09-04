@@ -1,0 +1,7 @@
+"0","# Define queries"
+"0","sqlCmd1 <- ""SELECT COUNT(Director_ID) FROM director_info;"""
+"0","sqlCmd2 <- ""SELECT COUNT(ID) FROM movie_info;"""
+"0",""
+"0","# Count rows in director_info"
+"0","rs1 <- dbGetQuery(db, sqlCmd1)"
+"0","print(rs)"

@@ -1,0 +1,30 @@
+"0","```r
+# Simple Linear Regression from 2008 to 2018
+df <- passenger_counts %>%
+  filter(activity_period > 200800) %>%
+  filter(activity_period < 201900)
+
+model <- lm(df$total_passengers ~ df$activity_period)
+print(model)
+```"
+"1","
+Call:
+lm(formula = df$total_passengers ~ df$activity_period)
+
+Coefficients:
+       (Intercept)  df$activity_period  
+        -334959715                1682  
+"
+"0","```r
+# y = -334959715 + 1682(activity_period)
+forecast2019 <- -334959715 + (1682*201903)
+forecst2020 <- -334959715 + (1682*202003)
+print(forecast2019)
+```"
+"1","[1] 4641131
+"
+"0","```r
+print(forecst2020)
+```"
+"1","[1] 4809331
+"

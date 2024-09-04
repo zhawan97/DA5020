@@ -1,0 +1,16 @@
+"0","```r
+# Create list of European Countries
+europe <- c(\"Albania\", \"Austria\", \"Belgium\", \"Bulgaria\", \"Cyprus\", \"Denmark\", \"Estonia\", \"France\", \"Greece\", \"Iceland\", \"Italy\", \"Liechtenstein\", \"Luxembourg\", \"Moldova\", \"Montenegro\", \"North Macedonia\", \"Poland\", \"Romania\", \"San Marino\", \"Slovakia\", \"Spain\", \"Switzerland\", \"United Kingdom\", \"Andorra\", \"Belarus\", \"Bosnia and Herzegovina\", \"Croatia\", \"Czechia\", \"Finland\", \"Germany\", \"Hungary\", \"Ireland\", \"Latvia\", \"Lithuania\", \"Malta\", \"Monaco\", \"Netherlands\", \"Norway\", \"Portugal\", \"Russia\", \"Serbia\", \"Slovenia\", \"Sweden\", \"Ukraine\")
+
+euro_df <- filter(pov_df, Country %in% europe)
+
+Thresholds <- c(\"$2.15\", \"$3.65\", \"$6.85\")
+x <- mean(euro_df$`$2.15`, na.rm = TRUE)
+y <- mean(euro_df$`$3.65`, na.rm = TRUE)
+z <- mean(euro_df$`$6.85`, na.rm = TRUE)
+means <- c(x,y,z)
+
+mean_df <- data.frame(Thresholds, means)
+
+ggplot(mean_df, aes(x=Thresholds, y=means)) + geom_bar(stat = \"identity\") + labs(x = \"Poverty Thresholds\", y = \"Average(in percentage)\", title = \"Average Poverty Rates of European Countries\")
+```"

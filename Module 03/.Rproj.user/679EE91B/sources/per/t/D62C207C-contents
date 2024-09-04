@@ -1,0 +1,111 @@
+---
+title: "Module 03 hw"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+## Question 2
+
+Load global variables and csv files.
+tripdata_df is a data frame with 20 columns and 398644 rows. There are some columns that have approximately 80000 NA's. The column ehail_fee did not import correctly, every row in this column is NA.
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+
+tripdata_df <- read_csv("2020_Green_Taxi_Trip_Data.csv", na = "NA")
+
+tripdata_df
+dim(tripdata_df)
+summary(tripdata_df)
+```
+
+
+## Question 3
+
+For this question I decided that it would be best to find outliers in the data in order to find values that did not match my expectations. The three columns I picked were passenger_count fare_amount and trip_distance because these columns are all of type dbl and do not require further parsing in order to analyze. For this analysis an outlier is defined as being more than 2 standard deviations away.
+```{r}
+# passenger_count
+passenger_sd <- sd(tripdata_df$passenger_count, na.rm = TRUE)
+passenger_mean <- mean(tripdata_df$passenger_count, na.rm = TRUE)
+tripdata_df$passenger_z <- abs((passenger_mean-tripdata_df$passenger_count)/passenger_sd)
+passenger_outliers <- which(tripdata_df$passenger_z > 2)
+length(passenger_outliers)
+
+# fare_amount
+fare_sd <- sd(tripdata_df$fare_amount, na.rm = TRUE)
+fare_mean <- mean(tripdata_df$fare_amount, na.rm = TRUE)
+tripdata_df$fare_amount_z <- abs((fare_mean - tripdata_df$fare_amount)/fare_sd)
+fare_outliers <- which(tripdata_df$fare_amount_z > 2)
+length(fare_outliers)
+
+# trip_distance
+trip_sd <- sd(tripdata_df$trip_distance, na.rm = TRUE)
+trip_mean <- mean(tripdata_df$trip_distance, na.rm = TRUE)
+tripdata_df$trip_distance_z <- abs((trip_mean - tripdata_df$trip_distance)/trip_sd)
+trip_outliers <- which(tripdata_df$trip_distance_z > 2)
+length(trip_outliers)
+```
+I found that there were 15778 outliers for passenger_count, 20645 for fare_amount, and only 15 for trip_distance. The outliers for trip_distance are interesting because there are so few which makes sense since most taxis don't travel long distance. I decided to investigate further.
+```{r}
+
+#trip distance only
+tripdata_df %>%
+  select(trip_distance,trip_distance_z) %>%
+  filter(trip_distance_z > 2)
+
+#With fare_amount
+tripdata_df %>%
+  select(fare_amount,trip_distance,trip_distance_z,fare_amount_z) %>%
+  filter(trip_distance_z > 2)
+```
+These results lead me to believe that some sort of mistake happened during data entry because I do not believe these values are real. It is not believable that someone rode a taxi for 20,000 miles. Furthermore, these values were filtered by z > 2 but the smallest z score here is 11.8.
+I decided to also look at the fare paid for these trips and they are normal which reinforces the theory that these people traveled a normal distance but it was recorded incorrectly.
+
+## Question 4
+
+This histogram visualizes my previous work and shows that the data is skewed due to the extremely large outliers.
+```{r}
+ggplot(tripdata_df) + geom_histogram(mapping = aes(x = tripdata_df$trip_distance)) + scale_y_log10()
+```
+## Question 5
+
+Using the length() function we can se that there aare 3750 outliers in the tip_amount column and 15 outliers in the trip_distance column.
+The dataframe tripdata_df was updated to remove the tip_amount outliers by piping in the original dataframe into the function filter(tip_z < 3)
+```{r}
+
+#tip_amount
+tip_sd <- sd(tripdata_df$tip_amount, na.rm = TRUE)
+tip_mean <- mean(tripdata_df$tip_amount, na.rm = TRUE)
+tripdata_df$tip_z <- abs((tip_mean-tripdata_df$tip_amount)/tip_sd)
+tip_outliers <- which(tripdata_df$tip_z > 3)
+
+#See question 3 for trip_distance outlier code
+
+#tip_amount
+tripdata_df %>%
+  select(tip_amount,tip_z) %>%
+  filter(tip_z > 3)
+
+#trip_distance
+tripdata_df %>%
+  select(trip_distance,trip_distance_z) %>%
+  filter(trip_distance_z > 3)
+
+#Remove tip_amount outliers
+tripdata_df <- tripdata_df %>%
+  filter(tip_z < 3)
+```
+## Question 6
+
+tripdata_df2 was created to remove trip_distance outliers and was used in ggplot().
+```{r}
+#Filter outliers
+tripdata_df2 <- tripdata_df %>%
+  filter(trip_distance_z < 3)
+
+ggplot(tripdata_df2, aes(x=tripdata_df2$payment_type, y=tripdata_df2$trip_distance)) + geom_bar(stat = "identity") + labs(title = "Distance by Payment Type") + labs(x="Payment Type", y="Trip Distance")
+```
+

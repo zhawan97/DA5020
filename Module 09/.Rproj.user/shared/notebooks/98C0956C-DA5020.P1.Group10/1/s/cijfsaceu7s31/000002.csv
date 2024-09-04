@@ -1,0 +1,24 @@
+"0","```r
+
+# ADMISSIONS ANALYSIS
+
+admissions_sd <- sd(admissions_df$admissions, na.rm = TRUE)
+admissions_mean <- mean(admissions_df$admissions, na.rm = TRUE)
+admissions_median <- median(admissions_df$admissions, na.rm = TRUE)
+admissions_var <- sqrt(admissions_sd)
+
+# Assign z-scores
+
+admissions_df$admissions_z <- abs((admissions_mean - admissions_df$admissions)/admissions_sd)
+admissions_outliers <- admissions_df %>%
+  filter(admissions_z > 1.5)
+num_outliers <- as.character(length(admissions_outliers))
+
+cat(\"There are \", num_outliers, \" outliers in the data set \nAn outlier is defined as a value having a z-score greater than 1.5 \n\n\")
+```"
+"1","There are  8  outliers in the data set 
+An outlier is defined as a value having a z-score greater than 1.5 
+"
+"0","```r
+admissions_outliers
+```"

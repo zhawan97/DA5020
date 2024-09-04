@@ -1,0 +1,6 @@
+"0","```r
+
+admissions_substance_plot <- ggplot(admissions_by_substance, aes(x = primary_substance_group, y = admissions)) + geom_bar(stat = \"identity\") + labs(x = \"Primary Substance\", y = \"Admssions\", title = \"Admissions By Substance\")
+
+admissions_age_plot
+```"

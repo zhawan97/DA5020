@@ -1,0 +1,74 @@
+---
+title: "Practicum 1"
+author: "Prem Ganesh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Part 1**
+
+## #1
+
+```{r}
+# Create the Dataframe
+doctors_df <- data.frame(
+  doctor_type = c("PCP", "Psychiatrist", "Surgeon", "Anesthesia"),
+  doctor_lastname = c("Smith", "Dame", "Jones", "Zayas"),
+  location = c("MA", "ME", "NH", "VT"),
+  AVG_Rating = c(7, 9, 8, 9)
+)
+
+# Print the dataframe
+print(doctors_df)
+```
+
+## #2
+
+"Smith" is selected in row 1 column 2.
+
+```{r}
+print(doctors_df[1, 2])
+```
+
+The Psychiatrist, Surgeon, and Anesthesia rows are selected in their entirety.
+
+```{r}
+print(doctors_df[2:4,])
+```
+
+The AVG_Rating data is selected.
+
+```{r}
+print(doctors_df[, ncol(doctors_df)])
+```
+
+## #3
+
+I chose to plot weight on the x axis and mpg on the y axis. I inferred that heavier cars would be less fuel efficient than lighter ones and wanted to test that hypothesis. Coloring the points by the number of cylinders provides additional insight into whether that adds to the weight and in turn affects the mpg.
+
+```{r}
+library(ggplot2)
+
+ggplot(mtcars, aes(x = wt, y = mpg, color = as.factor(cyl))) +
+  geom_point() +
+  labs(title = "Scatterplot of MPG vs. Weight by # of Cylinders",
+       x = "Weight (1000 lbs",
+       y = "Miles per Gallon",
+       color = "# of Cylinders")
+```
+
+## #4
+
+I picked the same variables as #3 based on the same hypothesis that heavier vehicles are likely less fuel efficient, which is a practical concern both for consumers and for manufacturers. The pearson coefficient, in general, quantifies the strength and direction of a linear relationship. In this case, we are expecting that weight and mpg are negatively correlated (higher weight is lower mpg). A pearson coefficient of -1 would imply a perfect negative linear relationship. We calculated a value of -0.87 for the correlation of wt and mpg which supports our original hypothesis.
+
+```{r}
+# Generate summary stats
+summary(mtcars)
+
+# Caclulate pearson correlation coefficient on same variables as #3
+cor(mtcars$mpg, mtcars$wt, method = "pearson")
+```

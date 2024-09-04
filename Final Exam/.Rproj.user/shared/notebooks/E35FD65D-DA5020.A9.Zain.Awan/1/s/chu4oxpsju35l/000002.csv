@@ -1,0 +1,13 @@
+"0","```r
+# filter dataframe for march only
+march_df <- traffic_df %>%
+  filter(str_extract(activity_period, \"[0-9]{2}$\") == \"03\")
+
+# Calculate total passengers for each period
+passenger_counts <- march_df %>% 
+  group_by(activity_period) %>%
+  summarize(total_passengers = sum(passenger_count))
+
+# Visualize with line graph
+ggplot(passenger_counts, aes(x=activity_period, y=total_passengers)) + geom_line() + geom_point() + labs(x = \"Activity Period\", y = \"Total Passengers\", title = \"Total Passengers by Activity Period\") + scale_y_log10()
+```"

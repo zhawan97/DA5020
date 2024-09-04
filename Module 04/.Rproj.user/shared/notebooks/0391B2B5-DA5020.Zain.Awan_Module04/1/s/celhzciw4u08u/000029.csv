@@ -1,0 +1,4 @@
+"0","tripdata_df %>%"
+"0","  mutate(dt = mdy_hms(tripdata_df$lpep_pickup_datetime)) %>%"
+"0","  mutate(lpep_pickup_hour = HourOfDay(dt)) %>% "
+"0","  select(lpep_pickup_hour)"

@@ -1,0 +1,1 @@
+"0","ggplot(tripdata_df) + geom_histogram(mapping = aes(x = tripdata_df$trip_distance)) + scale_y_log10()"

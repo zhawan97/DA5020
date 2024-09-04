@@ -1,0 +1,247 @@
+---
+title: "Practicum 3"
+author: "Prem Ganesh, Zain Awan, Soon Ho Kwon"
+date: "2024-04-14"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading package
+```{r}
+library(tidyverse)
+```
+
+
+## Question 1
+### Data Exploration
+```{r}
+# loading data
+taxi_data <- read.csv("2020_Green_Taxi_Trip_Data.csv")
+
+glimpse(taxi_data)
+
+summary(taxi_data)
+
+# selecting only numeric variables from data
+numeric_vars <- taxi_data[sapply(taxi_data, is.numeric)]
+
+# function to plot the histogram of numeric variables
+hist_plots <- function(numeric_vars) {
+  for(i in 1:length(numeric_vars)) {
+    column_name <- colnames(numeric_vars)[i]
+    hist(taxi_data[[column_name]], main = paste("Distribution of", column_name),
+         xlab = column_name)
+  }
+}
+# plotting histograms of numeric variables
+hist_plots(numeric_vars)
+```
+There are 19 variables that can be used to determine the target variable, tip_amount. There are 398644 observations that will be used to predict tip_amount. 
+
+The summary of the data shows that some of the variables have missing values, which should be removed to be able to calculate the correlation between the numeric variables. variables with missing values are VendorID, RatecodeID, passenger_count, ehail_fee, payment_type, trip_type, congestion_surcharge. Missing values have the same amount of na's which could signify the values were from the same row. 
+
+A function was written to visualize the distribution of the numeric variables. From the histogram of VendorID, it is a categorical variable showing a distribution of mostly vendor 2 which is VeriFone Inc. The distribution of RatecodeID and the summary shows that the majority of the trips were standard trips. The distribution of PULocationID does not skew to either side of the graph and has a peak at around 50. The passenger count is mostly 1 passenger. There were some variables that are inconsistent, such as fare_amount, extra, mta_tax, improvement_surcharge, and total_amount, since they have negative amounts and would not be consistent with the data dictionary that was accompanying the dataset.  
+
+
+```{r}
+# function to plot boxplots fo outlier 
+box_plots <- function(numeric_vars) {
+  for(i in 1:length(numeric_vars)) {
+    column_name <- colnames(numeric_vars)[i]
+    boxplot(taxi_data[[column_name]], main = paste("Boxplot of", column_name),
+         xlab = column_name)
+  }
+}
+# plotting boxplots for numeric variables
+box_plots(numeric_vars)
+```
+A function to plot boxplots for numeric variables was written to visualize outliers. Based on the boxplots, 
+
+
+```{r}
+# correlation of dataset
+cor(numeric_vars, use = "pairwise.complete.obs")
+```
+Based on the correlation data, there is multicollinearity present. fare_amount and total_amount have colinearity in this data with a correlation of 0.97876257, mta_tax and trip_type also have colinearity with a correlation of -0.740339427, and RatecodeID and trip_type have colinearity of 0.890175993. 
+
+
+### Feature selection 
+Not all variables are useful for the prediction of the target variable, tip_amount. The following variables will not useful to determine tip amount: VendorID, store_and_fwd_flag, ehail_fee, trip_type, and tolls_amount. VendorID is removed from as a predictor because the provider of taxi would not impact the amount of tips received, store_and_fwd_flag was removed because its a variable that indicates whether the record was stored or not and is not relevant to tip_amount, ehail_fee was removed because it only contains na values, trip_type determines whether the cab is street hail or dispatch which would not impact tip amount, and tolls_amount was determined to be irrelevant to tip amount because regarding of the trip destination tolls are going to be used. 
+```{r}
+predictor_vars <- taxi_data |> 
+  select(-c(VendorID, store_and_fwd_flag, ehail_fee, trip_type, tolls_amount))
+
+head(predictor_vars)
+```
+
+
+
+## Question 2
+
+### Data Preprocessing
+
+```{r}
+# Remove rows with missing values in key columns
+taxi_data_clean <- taxi_data %>%
+  filter(!is.na(VendorID), 
+         !is.na(RatecodeID), 
+         !is.na(passenger_count), 
+         !is.na(payment_type), 
+         !is.na(trip_type), 
+         !is.na(congestion_surcharge)) %>%
+  # Remove rows with negative fare, extra, mta_tax, improvement_surcharge, and total_amount as they are inconsistent with data dictionary
+  filter(fare_amount >= 0, 
+         extra >= 0, 
+         mta_tax >= 0, 
+         improvement_surcharge >= 0, 
+         total_amount >= 0) %>%
+  # Remove potential outliers (for now, anything outside 99th percentile)
+  filter(fare_amount <= quantile(fare_amount, 0.99),
+         extra <= quantile(extra, 0.99),
+         mta_tax <= quantile(mta_tax, 0.99),
+         tip_amount <= quantile(tip_amount, 0.99),
+         tolls_amount <= quantile(tolls_amount, 0.99),
+         total_amount <= quantile(total_amount, 0.99)) |> 
+  select(- ehail_fee) # removing ehail_fee column
+
+summary(taxi_data_clean)
+
+cor(taxi_data_clean %>% select_if(is.numeric), use = "pairwise.complete.obs")
+```
+Looking at the summary, we notice that variables such as fare_amount, extra, and mta_tax have had their negative values addressed, aligning them with the expected data range described in the data dictionary. This step is crucial because it ensures that the fare-related variables reflect actual transaction amounts.
+
+The count of NAs in certain variables such as ehail_fee, which was entirely composed of missing values, has been fixed by filtering out these observations. This could help to reduce noise in the eventual predictive model.
+
+The correlation matrix sheds light on the relationships between variables. High correlations, such as the ones between fare_amount and total_amount, point to multicollinearity, which can affect the performance and interpretation of predictive models. 
+
+### Normalize the Data
+
+```{r}
+# Max-Min Normalization
+taxi_data_norm <- taxi_data_clean %>%
+  mutate(across(where(is.numeric), ~(. - min(.)) / (max(.) - min(.)), .names = "norm_{.col}"))
+
+summary(taxi_data_norm)
+```
+
+A closer look at the normalized variables reveals that most of the minimum values are at or close to 0, and the maximum values are at or close to 1, indicating successful scaling. The mean values, now floating between 0 and 1, give us a sense of the data distribution post-normalization.
+
+Variables such as trip_distance have mean values that suggest a distribution skewed towards the lower end of the scale, which may imply that shorter trips are more common. Conversely, the total_amount variable has a higher mean, suggesting a more even distribution of trip costs or a presence of more expensive trips in the dataset.
+
+The min-max normalization process hasn't changed the inherent distribution of each variable; it has simply re-scaled the values. 
+
+### Encode the Data
+
+```{r}
+taxi_data_encoded <- taxi_data_clean %>%
+  mutate(across(.cols = where(is.character), .fns = ~as.integer(as.factor(.))))
+
+head(taxi_data_encoded)
+
+```
+
+### Prepare data for modeling
+
+```{r}
+set.seed(123) # Set seed
+
+# Shuffle  data
+shuffled_data <- taxi_data_encoded[sample(nrow(taxi_data_encoded)), ]
+
+# Split data into training and test sets (80% training, 20% testing)
+split_index <- round(0.8 * nrow(shuffled_data))
+training_set <- shuffled_data[1:split_index, ]
+test_set <- shuffled_data[(split_index + 1):nrow(shuffled_data), ]
+
+# Check size of each set
+nrow(training_set)
+nrow(test_set)
+```
+
+Here we set a seed number for reproducibility and then split the data into training and testing datasets. We chose to do 80% training and 20% testing split as is common practice. With around 30,000 rows of data this gives us enough data to train the model sufficiently while having enough left over to test its accuracy.
+
+
+## Question 3
+function takes in training set, test set, and a k-value. It returns the mean squared error of the actual tip amount in the test set with the predicted tip amount. 
+```{r warning=FALSE}
+library(class)
+
+
+# knn function taking in training_data, testing_data, and k value to predict knn and return MSE
+knn.predict <- function(data_train, data_test, k) {
+  data_train_labels <- data_train[, "tip_amount"]
+  knn_prediction <- as.data.frame(knn(train = data_train, test = data_test,
+                                      cl = data_train$tip_amount, k = k))
+  
+  # adding actual values to knn_prediction data frame
+  knn_prediction$actual_val <- data_test$tip_amount
+  
+  # calculating squared error for each prediction
+  knn_prediction$squared_error <- (knn_prediction$actual_val - as.numeric(knn_prediction[, 1])) ^ 2
+  
+  mean_squared_error <- mean(knn_prediction$squared_error)
+  
+  return(mean_squared_error) 
+}
+
+
+# testing function with k = 3
+mse_3 <- knn.predict(training_set, test_set, 3)
+mse_3
+```
+
+
+## Quesiton 4
+
+```{r}
+#creating data frame with 1 row and 20 columns to store mse
+knn_mse <- data.frame(matrix(nrow = 20, ncol = 2)) # --- if running 20 k-values, use nrow = 20
+# adding relevant column names
+colnames(knn_mse) <- c("k_value", "mse")
+
+# testing five different k-values
+for(i in 1:20) { # --- change to 20 different values if testing 20 k-values
+  # adding mse values to dataframe
+  knn_mse[i, 2] <- knn.predict(training_set, test_set, i)
+
+  # adding k-values to dataframe
+  knn_mse[i, 1] <- i
+}
+
+knn_mse
+
+# creating line graph
+knn_mse |> 
+  ggplot(aes(k_value, mse)) + geom_line() + labs(x = "K-value", y = "MSE", title = "K-value and MSE line graph")
+```
+From our output we can see that as the k-value increases the MSE decreases. The most suitable k value is 20 which returned a MSE 25.19. This is optimal because a lower MSE implies that the predicted value is closer to the actual value. This is not the best model because finding the most optimal k-value is computationally expensive and returns MSEs that are still relatively high. Given the context of tips, an MSE of 25 seems relatively high.
+
+
+## Question 5
+
+```{r}
+set.seed(123) # Set seed
+
+# Shuffle  data
+shuffled_data <- taxi_data_encoded[sample(nrow(taxi_data_encoded)), ]
+
+knn_ratio_test <- as.data.frame(matrix(nrow = 8, ncol = 2))
+colnames(knn_ratio_test) <- c("MSE","Ratio")
+ratio <- 0.8 # Bug identified. ratio variable was originally defined inside the for loop
+for (i in 1:8) {
+  # Split data into training and test sets (80% training, 20% testing)
+  split_index <- round(ratio * nrow(shuffled_data))
+  training_set <- shuffled_data[1:split_index, ]
+  test_set <- shuffled_data[(split_index + 1):nrow(shuffled_data), ]
+  
+  knn_ratio_test[i,2] <- ratio # Add ratio to dataframe
+  ratio <- ratio - 0.1 # increment test ratio by -0.1
+  
+  knn_ratio_test[i,1] <- knn.predict(training_set, test_set, 3) # Add MSE to dataframe
+}
+
+knn_ratio_test
+```
+
+For this question we decided to optimize the model by testing which ratio returns the best MSE. A for loop was implemented in order to run the function knn() on our training and test sets. However, the index which delineates the 2 sets is recalculated using a new ratio. We started at a ratio of 0.8 and incremented the ratio by -0.1. The loop is run 8 times which gives us a range of 0.1-0.8. From the table we can see that the lowest MSE is generated when we use a ratio of 0.5.

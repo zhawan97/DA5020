@@ -1,0 +1,5 @@
+"0","senate$last_name <- str_extract(senate$last_name, ""[A-Z][a-z]+"")"
+"0","senate$first_name <- str_extract(senate$first_name, ""[A-Z][a-z]+"")"
+"0","senate$party <- str_extract(senate$party, ""[DRI]"")"
+"0","senate$full_and_party <- paste(senate$first_name,senate$last_name,senate$party)"
+"0",""

@@ -1,0 +1,12 @@
+"0","```r
+# Create dataframe df with columns lpep_pickup_hour and trip_distance
+df <- tripdata_df %>%
+  mutate(dt = mdy_hms(tripdata_df$lpep_pickup_datetime)) %>%
+  mutate(lpep_pickup_hour = HourOfDay(dt)) %>% 
+  select(lpep_pickup_hour, trip_distance)
+
+by_hour <- group_by(df, lpep_pickup_hour) %>%
+  summarise(median = median(trip_distance))
+
+ggplot(by_hour, aes(x=lpep_pickup_hour, y=median)) + geom_bar(stat = \"identity\") + labs(title=\"Median Trip Distance by Hour\", x = \"Hour\", y=\"Median Trip Distance\")
+```"

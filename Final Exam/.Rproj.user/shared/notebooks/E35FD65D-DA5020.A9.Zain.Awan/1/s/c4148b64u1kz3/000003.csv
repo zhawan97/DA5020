@@ -1,0 +1,8 @@
+"0","```r
+
+# remove extra columns
+traffic_df <- traffic_df %>%
+  select(activity_period, operating_airline, operating_airline_iata_code, published_airline, published_airline_iata_code, geo_summary, geo_region, activity_type_code, price_category_code, terminal, boarding_area, passenger_count)
+
+head(traffic_df)
+```"

@@ -1,0 +1,6 @@
+"0","# Finding hospitals that are top 10 in license beds, census beds, and staffed beds"
+"0","# Joining hospitals that are present in both top 10 license beds and census beds"
+"0","common_license_census <- inner_join(top_license_beds, top_census_beds, by = join_by(business_name))"
+"0","# Joining hospitals from joined dataframe above to top 10 staffed beds"
+"0","common_hospitals <- inner_join(common_license_census, top_staffed_beds, by = join_by(business_name))"
+"0","common_hospitals"

@@ -1,0 +1,12 @@
+"0","```r
+# COUNTY ANALYSIS
+
+admissions_by_county <- admissions_df %>%
+  group_by(county_of_program_location) %>%
+  select(county_of_program_location, admissions) %>%
+  arrange(county_of_program_location, .locale = \"en\")
+
+admissions_by_county %>%
+  count(county_of_program_location, wt = admissions) %>%
+  arrange(county_of_program_location, .locale = \"en\")
+```"

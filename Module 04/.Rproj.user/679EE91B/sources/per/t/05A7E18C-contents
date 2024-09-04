@@ -1,0 +1,111 @@
+---
+title: "Module 04"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+Set global variables and load libraries
+
+```{r}
+library(stringr)
+library(ggplot2)
+library(tidyverse)
+
+
+tripdata_df <- read_csv("2020_Green_Taxi_Trip_Data.csv", na = "NA")
+as_tibble(tripdata_df)
+tripdata_df
+```
+
+
+## Question 1
+
+For this question the three columns I identifed to convert to factors were trip_type payment_type and PULocationID. I chose these columns because they contain categorical data.
+
+```{r}
+tripdata_df$trip_type <- factor(tripdata_df$trip_type)
+tripdata_df$payment_type <- factor(tripdata_df$payment_type)
+tripdata_df$PULocationID <- factor(tripdata_df$PULocationID)
+```
+
+
+## Question 2
+
+I decided to visualize the two columns using bar charts. I calculated the proportions of the values in each column in order to compare them and found that for trip_type almost 98% of the trips were street hailed and less than 2% were dispatch.
+
+For payment_type about 53% used credit card and 45% used cash. The catefories no charge, dispute, and unkown had less than 1% total and there were no voided trips.
+```{r}
+trip_type_proportions <- tripdata_df %>%
+  count(trip_type) %>%
+  mutate(trip_type_proportion = n / sum(n)) %>%
+  select(trip_type, trip_type_proportion)
+
+payment_type_proportions <- tripdata_df %>%
+  count(payment_type) %>%
+  mutate(payment_type_proportion = n / sum(n)) %>%
+  select(payment_type,payment_type_proportion)
+
+ggplot(trip_type_proportions, aes(x=trip_type, y=trip_type_proportion)) + geom_bar(stat = "identity") + labs(title = "Trip Type Proportions", x = "Trip Type", y = "Proportion")
+
+trip_type_proportions
+
+ggplot(payment_type_proportions, aes(x=payment_type, y=payment_type_proportion)) + geom_bar(stat = "identity") + labs(title = "Payment Type Proportions", x = "Payment Type", y = "Proportions")
+
+payment_type_proportions
+```
+
+
+## Question 3
+
+For this question I created a new column called dt which takes the column and lpep_pickup_datetime and stores it as a mdy_hms object. I created another column to extract the day and plotted this column on a barchart.
+From this graph you can see a cyclical increase in the frequency that taxis pickup customers follwed by a steep decresae as the cycle resets. From this pattern you can deduce that the frequency increases as the week progresses due to the customers need to travel work and social events at the end of the week followed by not that much activity occuring on the weekends.
+```{r}
+pickup_count <- tripdata_df %>%
+  mutate(dt = mdy_hms(tripdata_df$lpep_pickup_datetime)) %>%
+  mutate(day = day(dt)) %>% 
+  select(day) %>%
+  count(day)
+
+ggplot(pickup_count, aes(x=day, y=n)) + geom_bar(stat = "identity") + labs(title="Pickup Frequency", x = "day", y = "count")
+```
+
+## Question 4
+
+For simplicity I used lubridate to extract the hour.
+```{r}
+HourOfDay <- function (x) {
+  y = hour(x)
+  return (y)
+}
+```
+
+
+## Question 5
+
+In order for the function to work the lpep_pickup_datetime column must first be converted using mdy_hms.
+```{r}
+tripdata_df %>%
+  mutate(dt = mdy_hms(tripdata_df$lpep_pickup_datetime)) %>%
+  mutate(lpep_pickup_hour = HourOfDay(dt)) %>% 
+  select(lpep_pickup_hour)
+```
+
+## Question 6
+
+The bar chart shows that the median trip distance is equivalent across the board except between 05:00 and 07:00. There is a spike in trip distance in the early morning which is most likely due to people commuting for work.
+```{r}
+# Create dataframe df with columns lpep_pickup_hour and trip_distance
+df <- tripdata_df %>%
+  mutate(dt = mdy_hms(tripdata_df$lpep_pickup_datetime)) %>%
+  mutate(lpep_pickup_hour = HourOfDay(dt)) %>% 
+  select(lpep_pickup_hour, trip_distance)
+
+# Group trip_distance by pickup hour
+by_hour <- group_by(df, lpep_pickup_hour) %>%
+  summarise(median = median(trip_distance))
+
+ggplot(by_hour, aes(x=lpep_pickup_hour, y=median)) + geom_bar(stat = "identity") + labs(title="Median Trip Distance by Hour", x = "Hour", y="Median Trip Distance")
+```
+

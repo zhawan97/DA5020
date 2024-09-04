@@ -1,0 +1,308 @@
+---
+title: "Practicum 2"
+author: "Prem Ganesh, Zain Awan, Soon Ho Kwon"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Question 1: Identify Dimensions
+
+Fact: Quantitative data or facts of a business Dimension: Context or descriptive information about facts
+
+From the above definitions let us examine the data to determine what is a fact and what is a dimension.
+
+```{r message=FALSE, warning=FALSE}
+# Load libraries
+library(RSQLite)
+library(tidyverse)
+
+# read and print csv files
+bedtype_df <- read_csv("bed_type.csv")
+business_df <- read_csv("business.csv")
+
+head(bedtype_df)
+head(business_df)
+```
+
+In the above code we can examine bed_type.csv and business.csv and load them into dataframes. Let's start with bedtype_df. This dataframe has 3 columns, bed_id, bed_code, and bed_desc. Each of these attributes can be considered as a dimension because the elements in each column aren't recordings of business transactions or records, rather the elements of the columns provide context or explanations of data found in the next dataframe we will examine.
+
+bedtype_df contains dimensions which provide context for the dataframe business_df. This is a dataframe with 6 columns, so let's group some of the columns and examine them together.
+
+ims_org_id and business_name are paired together becuase they both measure the same thing, which is the identity of the business. Despite their similarities, ims_org_id is a dimension and business_name is a fact because ims_org_id is a primary key or PK and business_name is an attribute that records a business fact.
+
+Moving onto ttl_license_beds, ttl_census_beds, and ttl_staffed_beds we can see that these 3 columns are clearly facts because they measure the amount of each type bed in the respective hospitals. the ttl stands for total so we can assume that the type of bed is not taken into consideration in this table. A breakdown of the totals by bed type is provided in bedfact_df. Lastly, we have bed_cluster_id which is a dimension. This is because the elements of the column are a PK.
+
+## Question 2: Identify Facts
+
+The first dataframe printed below is a fact table called bedfact_df. It contains 5 columns, three of which are facts and the rest are dimensions.
+
+```{r message=FALSE}
+# Read bed_fact.csv and print the dataframe
+bedfact_df <- read_csv("bed_fact.csv")
+print(bedfact_df)
+
+# Select the 3 fact columns and print them
+factsonly_df <- bedfact_df %>%
+  select(license_beds,census_beds,staffed_beds)
+print(factsonly_df)
+```
+
+The second dataframe has only the fact columns selected from the original bedfact_df. The columns that were cut are ims_org_id and bed_id because they are the same dimension columns described in question 1.
+
+## Question 3a: Analysis For Leadership
+
+```{r}
+library(DBI)
+library(RSQLite)
+library(readr)
+
+# Load CSV files into data frames
+business_df <- read_csv("business.csv", show_col_types = FALSE)
+bed_type_df <- read_csv("bed_type.csv", show_col_types = FALSE)
+bed_fact_df <- read_csv("bed_fact.csv", show_col_types = FALSE)
+
+# Create an in-memory SQLite database
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+
+# Write the data frames to the database
+dbWriteTable(con, "business", business_df)
+dbWriteTable(con, "bed_type", bed_type_df)
+dbWriteTable(con, "bed_fact", bed_fact_df)
+```
+
+**License Beds**
+
+```{sql connection=con, output.var = "licensed_beds"}
+SELECT b.business_name AS hospital_name,
+       SUM(f.license_beds) AS total_license_beds
+FROM bed_fact f
+JOIN business b ON f.ims_org_id = b.ims_org_id
+JOIN bed_type t ON f.bed_id = t.bed_id
+WHERE t.bed_id IN (4, 15)  -- ICU or SICU
+GROUP BY b.business_name
+ORDER BY total_license_beds DESC
+LIMIT 10
+```
+
+**Census Beds**
+
+```{sql connection=con, output.var="census_beds"}
+SELECT b.business_name AS hospital_name,
+       SUM(f.census_beds) AS total_census_beds
+FROM bed_fact f
+JOIN business b ON f.ims_org_id = b.ims_org_id
+JOIN bed_type t ON f.bed_id = t.bed_id
+WHERE t.bed_id IN (4, 15)  -- ICU or SICU
+GROUP BY b.business_name
+ORDER BY total_census_beds DESC
+LIMIT 10
+```
+
+**Staffed Beds**
+
+```{sql connection=con, output.var="staffed_beds"}
+SELECT b.business_name AS hospital_name,
+       SUM(f.staffed_beds) AS total_staffed_beds
+FROM bed_fact f
+JOIN business b ON f.ims_org_id = b.ims_org_id
+JOIN bed_type t ON f.bed_id = t.bed_id
+WHERE t.bed_id IN (4, 15)  -- ICU or SICU
+GROUP BY b.business_name
+ORDER BY total_staffed_beds DESC
+LIMIT 10
+```
+
+```{r}
+print(licensed_beds)
+print(census_beds)
+print(staffed_beds)
+```
+
+## Question 3b: Interpretations
+
+1.  Total beds for each hospital across all categories:
+
+```{r}
+total_beds <- Reduce(function(x, y) merge(x, y, by = "hospital_name", all = TRUE), list(licensed_beds, census_beds, staffed_beds))
+total_beds$total_beds <- rowSums(total_beds[, c("total_license_beds", "total_census_beds", "total_staffed_beds")], na.rm = TRUE)
+total_beds_ranked <- total_beds[order(-total_beds$total_beds), c("hospital_name", "total_beds")]
+
+print(total_beds_ranked)
+```
+
+2.  Hospitals that appear in all 3 lists:
+
+```{r}
+common_hospitals <- Reduce(intersect, list(licensed_beds$hospital_name, census_beds$hospital_name, staffed_beds$hospital_name))
+
+print(common_hospitals)
+```
+
+3.  Score each hospital based on ranking in each of the 3 lists:
+
+```{r}
+score_hospital <- function(df) {
+  df$score <- 10:1
+  return(df[, c("hospital_name", "score")])
+}
+
+licensed_scores <- score_hospital(licensed_beds)
+census_scores <- score_hospital(census_beds)
+staffed_scores <- score_hospital(staffed_beds)
+
+# Combine scores from all categories
+combined_scores <- rbind(licensed_scores, census_scores, staffed_scores)
+
+# Aggregate scores for each hospital
+aggregate_scores <- aggregate(score ~ hospital_name, combined_scores, sum)
+
+# Sort hospitals by total score
+aggregate_scores <- aggregate_scores[order(-aggregate_scores$score), ]
+
+# Print top hospitals by total score
+print(aggregate_scores)
+```
+
+In Question 2 we generated tables with the top 3 hospitals in terms of ICU and SICU beds. Using these 3 tables, we sought to determine which hospitals had the most to offer in that regard. We chose to confirm our choices using 3 different analyses: ranking hospitals by total number of beds available (ICU + SICU), finding only hospitals that rank in the top 10 for each type of bed (staffed, licensed, census), and scoring each hospital based on how they rank compared to other hospitals for each of the 3 types and aggregating scores. There were 2 hospitals which consistently were the best when using these 3 methods: **Vidant Medical Center and University of Maryland Medical Center**.
+
+## Question 4a: Drill down investigation
+
+**Licensed Beds in Hospitals with Both ICU and SICU**
+
+```{sql connection=con, output.var = "licensed_beds_both"}
+SELECT b.business_name AS hospital_name,
+       SUM(f.license_beds) AS total_license_beds
+FROM bed_fact f
+JOIN business b ON f.ims_org_id = b.ims_org_id
+JOIN bed_type t ON f.bed_id = t.bed_id
+WHERE t.bed_id IN (4, 15)
+  AND f.ims_org_id IN (
+    SELECT ims_org_id
+    FROM bed_fact
+    WHERE bed_id = 4 AND license_beds > 0
+  )
+  AND f.ims_org_id IN (
+    SELECT ims_org_id
+    FROM bed_fact
+    WHERE bed_id = 15 AND license_beds > 0
+  )
+GROUP BY b.business_name
+HAVING COUNT(DISTINCT t.bed_id) = 2
+ORDER BY total_license_beds DESC
+LIMIT 10
+
+```
+
+**Census Beds in Hospitals with Both ICU and SICU**
+
+```{sql connection=con, output.var="census_beds_both"}
+SELECT b.business_name AS hospital_name,
+       SUM(f.census_beds) AS total_census_beds
+FROM bed_fact f
+JOIN business b ON f.ims_org_id = b.ims_org_id
+JOIN bed_type t ON f.bed_id = t.bed_id
+WHERE t.bed_id IN (4, 15)
+  AND f.ims_org_id IN (
+    SELECT ims_org_id
+    FROM bed_fact
+    WHERE bed_id = 4 AND census_beds > 0
+  )
+  AND f.ims_org_id IN (
+    SELECT ims_org_id
+    FROM bed_fact
+    WHERE bed_id = 15 AND census_beds > 0
+  )
+GROUP BY b.business_name
+HAVING COUNT(DISTINCT t.bed_id) = 2
+ORDER BY total_census_beds DESC
+LIMIT 10
+
+```
+
+**Staffed Beds in Hospitals with Both ICU and SICU**
+
+```{sql connection=con, output.var="staffed_beds_both"}
+SELECT b.business_name AS hospital_name,
+       SUM(f.staffed_beds) AS total_staffed_beds
+FROM bed_fact f
+JOIN business b ON f.ims_org_id = b.ims_org_id
+JOIN bed_type t ON f.bed_id = t.bed_id
+WHERE t.bed_id IN (4, 15)
+  AND f.ims_org_id IN (
+    SELECT ims_org_id
+    FROM bed_fact
+    WHERE bed_id = 4 AND staffed_beds > 0
+  )
+  AND f.ims_org_id IN (
+    SELECT ims_org_id
+    FROM bed_fact
+    WHERE bed_id = 15 AND staffed_beds > 0
+  )
+GROUP BY b.business_name
+HAVING COUNT(DISTINCT t.bed_id) = 2
+ORDER BY total_staffed_beds DESC
+LIMIT 10
+
+```
+
+**Print all dataframes (Top 10)**
+
+```{r}
+print(licensed_beds_both)
+print(census_beds_both)
+print(staffed_beds_both)
+```
+
+### Interpretation
+
+1.  Total beds for each hospital across all categories:
+
+```{r}
+total_beds_both <- Reduce(function(x, y) merge(x, y, by = "hospital_name", all = TRUE), list(licensed_beds_both, census_beds_both, staffed_beds_both))
+total_beds_both$total_beds <- rowSums(total_beds_both[, c("total_license_beds", "total_census_beds", "total_staffed_beds")], na.rm = TRUE)
+total_beds_ranked_both <- total_beds_both[order(-total_beds_both$total_beds), c("hospital_name", "total_beds")]
+print(total_beds_ranked_both)
+```
+
+2.  Hospitals that appear in all 3 lists:
+
+```{r}
+common_hospitals_both <- Reduce(intersect, list(licensed_beds_both$hospital_name, census_beds_both$hospital_name, staffed_beds_both$hospital_name))
+
+print(common_hospitals_both)
+
+```
+
+3.  Score each hospital based on ranking in each of the 3 lists:
+
+```{r}
+score_hospital <- function(df) {
+  df$score <- 10:1
+  return(df[, c("hospital_name", "score")])
+}
+
+licensed_scores_both <- score_hospital(licensed_beds_both)
+census_scores_both <- score_hospital(census_beds_both)
+staffed_scores_both <- score_hospital(staffed_beds_both)
+
+# Combine scores from all categories
+combined_scores_both <- rbind(licensed_scores_both, census_scores_both, staffed_scores_both)
+
+# Aggregate scores for each hospital
+aggregate_scores_both <- aggregate(score ~ hospital_name, combined_scores_both, sum)
+
+# Sort hospitals by total score
+aggregate_scores_both <- aggregate_scores_both[order(-aggregate_scores_both$score), ]
+print(aggregate_scores_both)
+```
+
+Here we did the same analyses as in Question 3, this time only looking at hospitals that had both ICU AND SICU beds available. This time there were 5 hospitals that appeared on all 3 lists (census beds, licensed beds, and staffed beds). However, further analysis showed one hospital more consistently at the top of the list: **University of Maryland Medical Center**. The other highly ranked hospital was **Shands Hospital at the University of Florida**. 
+
+## Final Recommendation
+
+Based on the comprehensive analyses conducted in steps 3a and 4a, we recommend the **University of Maryland Medical Center** as the primary hospital for the pilot intervention program aimed at improving patient outcomes through enhanced nurse staffing in ICU and SICU beds. This recommendation is grounded in the hospital's consistent top-tier performance in both analyses, demonstrating a significant capacity in ICU and SICU bed volumes which is essential for the success of the intervention. The **University of Maryland Medical Center** not only ranks at the forefront for ICU and SICU beds but also exhibits a robust infrastructure capable of supporting the intended staffing enhancements, making it an ideal candidate for the pilot.
+
+As a secondary option, we recommend **Shands Hospital at the University of Florida**. Despite not being the runner-up in the initial analysis, Shands Hospital ranks in the top 3 for both analyses when considering hospitals with both ICU and SICU beds. This positions it as a strong contender for the pilot program, especially considering the potential for comprehensive care in critical units such as the ICU and SICU. The hospital's consistent appearance in top rankings underscores its capacity and readiness for an intervention of this scale.
+
+In conclusion, the selection of the **University of Maryland Medical Center** and **Shands Hospital at the University of Florida** aligns with the leadership's objective to enhance patient care in critical units. These hospitals not only possess the necessary infrastructure but also demonstrate the volume and capacity to make the most of the proposed nurse staffing intervention, ensuring the program's success and sustainability.

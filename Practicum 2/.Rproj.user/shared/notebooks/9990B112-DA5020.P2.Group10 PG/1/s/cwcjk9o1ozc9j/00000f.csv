@@ -1,0 +1,8 @@
+"0","common_hospitals <- Reduce(intersect, list(licensed_beds$hospital_name, census_beds$hospital_name, staffed_beds$hospital_name))"
+"0",""
+"0","print(common_hospitals)"
+"1","[1]"
+"1"," ""University of Maryland Medical Center"""
+"1"," ""Vidant Medical Center""                "
+"1","
+"

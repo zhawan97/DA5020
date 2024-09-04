@@ -1,0 +1,5 @@
+"0","# Calculate Gini Coefficient"
+"0","pov_df$Gini <- pov_df$`$2.15`/(pov_df$`$2.15` + (pov_df$`$3.65` + pov_df$`$6.85`))"
+"0",""
+"0",""
+"0","ggplot(pov_df, aes(x=`$2.15`, y = Gini)) + geom_point() + geom_smooth(method = ""lm"", se = FALSE) + labs(title = ""Relationship between $2.15/day poverty rate and Gini Coefficient"", x = ""$2.15/day poverty rate"", y = ""Gini Coefficient"") + theme_minimal()"

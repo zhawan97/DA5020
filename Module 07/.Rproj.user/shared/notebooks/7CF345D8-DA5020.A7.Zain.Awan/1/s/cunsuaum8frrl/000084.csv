@@ -1,0 +1,2 @@
+"0",""
+"0","ggplot(selected_df, aes(x = Country)) + geom_col(aes(y = `$3.65`, fill = ""$3.65"")) + geom_col(aes(y = `Our Worldin Data[9]`, fill = ""OurWorldinData""))"

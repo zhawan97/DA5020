@@ -1,0 +1,6 @@
+"0","```r
+HourOfDay <- function (x) {
+  y = hour(x)
+  return (y)
+}
+```"

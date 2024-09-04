@@ -1,0 +1,7 @@
+"0","df <- indicator_data %>%"
+"0","  filter(Year > 2003) %>%"
+"0","  filter(`Country Code` == ""USA"" | `Country Code` == ""JPN"" | `Country Code` == ""IRQ"" | `Country Code` == ""VNM"" | `Country Code` == ""ISR"")"
+"0",""
+"0","ggplot(df, aes(x = Year, y = Ratio, group = `Country Code`, color = `Country Code`)) +"
+"0","  geom_line() +"
+"0","  facet_wrap(~ `Country Code`)"

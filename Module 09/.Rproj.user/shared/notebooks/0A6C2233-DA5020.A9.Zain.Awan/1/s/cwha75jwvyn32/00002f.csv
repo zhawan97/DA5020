@@ -1,0 +1,6 @@
+"0",""
+"0","# remove extra columns"
+"0","traffic_df <- traffic_df %>%"
+"0","  select(activity_period, operating_airline, operating_airline_iata_code, published_airline, published_airline_iata_code, geo_summary, geo_region, activity_type_code, price_category_code, terminal, boarding_area, passenger_count)"
+"0",""
+"0","head(traffic_df)"

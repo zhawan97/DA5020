@@ -1,0 +1,11 @@
+"0","```r
+# Getting total number of admissions 
+total_admissions <- sum(admissions_df$admissions)
+
+admissions_df |> 
+  group_by(county_of_program_location) |> 
+  summarise(admissions_per_county = n()) |> 
+  mutate(admissions_percentage = (admissions_per_county / total_admissions) * 100) |> 
+  ggplot(aes(county_of_program_location ,admissions_percentage)) + geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```"

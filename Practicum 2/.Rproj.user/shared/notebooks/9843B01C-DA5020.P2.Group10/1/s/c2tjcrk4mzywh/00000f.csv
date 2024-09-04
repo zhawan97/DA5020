@@ -1,0 +1,3 @@
+"0","# merge bedfact_df and business_df to get column business_name"
+"0","bed_business <- merge(bedfact_df, business_df, by = ""ims_org_id"") %>%"
+"0","  select(ims_org_id, business_name, bed_id, license_beds, census_beds, staffed_beds)"

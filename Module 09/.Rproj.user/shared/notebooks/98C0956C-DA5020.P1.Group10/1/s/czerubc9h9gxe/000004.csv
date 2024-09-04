@@ -1,0 +1,16 @@
+"0","```r
+
+admissions_age_plot <- ggplot(admissions_by_age, aes(x = age_group, y = admissions)) + geom_bar(stat = \"identity\") + labs(x = \"Age Group\", y = \"Admssions\", title = \"Admissions By Age Group\")
+
+
+# PROGRAM CATEGORY ANALYSIS
+
+admissions_by_program <- admissions_df %>%
+  group_by(program_category) %>%
+  select(program_category, admissions) %>%
+  arrange(program_category, .locale = \"en\")
+
+admissions_by_program %>%
+  count(program_category, wt = admissions) %>%
+  arrange(program_category, .locale = \"en\")
+```"

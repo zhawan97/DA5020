@@ -1,0 +1,111 @@
+---
+title: "Assignment 6"
+author: "Zain Awan"
+output:
+  html_document:
+    df_print: paged
+---
+
+## QUestion 1
+
+Load necessary libraries for the assignment and connect to the database.
+```{r message=FALSE, warning=FALSE}
+library(RSQLite)
+library(tidyverse)
+library(ggplot2)
+
+db <- dbConnect(SQLite(), "imdb.db")
+```
+
+
+SQLite commands inserted into a comment chunk. These commands will open the imdb.db file, create a table called director_info and import the data from the csv into this table.
+```{r}
+# .open imdb.db
+
+# CREATE TABLE director_info (
+# Director_ID INTEGER PRIMARY KEY,
+#  Director_Name TEXT NOT NULL
+# );
+
+# .import directors.csv director_info --csv
+```
+
+
+## Question 2
+
+There are 548 rows in director_info and and 100 rows in movie_info
+```{r}
+# Define queries
+sqlCmd1 <- "SELECT COUNT(Director_ID) FROM director_info;"
+sqlCmd2 <- "SELECT COUNT(ID) FROM movie_info;"
+
+# Count rows in director_info
+rs1 <- dbGetQuery(db, sqlCmd1)
+print(rs1)
+
+# Count rows in movie_info
+rs2 <- dbGetQuery(db,sqlCmd2)
+print(rs2)
+```
+Prints a dataframe to the console with all of the movies released between the years of 2010 and 2020. The dataframe is used in ggplot to create a histogram which visualizes the distribution.
+```{r message=FALSE,warning=FALSE}
+#Define query that fetches only the movies released between 2010 and 2020
+sqlCmd3 <- "SELECT * FROM movie_info WHERE Release_Year >= :x AND Release_Year <= :y"
+query <- dbSendQuery(db, sqlCmd3)
+dbBind(query, params = list(x=2010,y=2020)) # Define parameters x=2010 and y=2020
+rs2 = dbFetch(query)
+print(rs2)
+
+ggplot(rs2, aes(x=Release_Year)) + geom_histogram(stat = "count") + labs(x="Release Year", y="Count", title="Releases By Year") 
+```
+
+The minimum rating for action movies is 7.6 and the maximum is 9.0
+```{r warning=FALSE}
+# Define Query to search for action movies. I could not get it to work with the = operator and wildcard so I used LIKE
+sqlCmd4 <- "SELECT * FROM movie_info WHERE Genre LIKE '%Action%'"
+rs3 <- dbGetQuery(db, sqlCmd4)
+
+# Return the summary statistics in order to get min and max of IMDB_Rating
+summary(rs3)
+```
+
+```{r}
+# Define query to return the top 25 highest grossing movies in the dataset
+sqlCmd5 <- "SELECT Series_Title, Genre, Gross FROM movie_info WHERE Gross IS NOT NULL ORDER BY Gross DESC LIMIT 25"
+rs4 <- dbGetQuery(db, sqlCmd5)
+print(na.omit(rs4))
+```
+
+JJ Abrams is the director with the highest grossing movie
+```{r}
+# Define query which joins the 2 tables together and returns the directors with the highest grossing movies
+sqlCmd6 <- "SELECT name, Gross FROM director_info JOIN movie_info ON director_info.Director_ID = movie_info.Director_ID ORDER BY Gross ASC"
+rs5 <- dbGetQuery(db,sqlCmd6)
+print(rs5)
+```
+
+```{r warning=FALSE}
+verifyDirector <- function(director_name) {
+  # Define query to check wheter the value exists or not
+  sqlString <- "SELECT EXISTS ( 
+  SELECT name FROM director_info
+  WHERE name = :x
+  );"
+  
+  sqlQuery <- dbSendQuery(db,sqlString)
+  dbBind(sqlQuery, params = list(x = director_name))
+  results <- dbFetch(sqlQuery)
+  
+  # Print result to console
+  if (results == TRUE) {
+    print("The name of the director you provided was found in the database")
+  } else {
+    print("Did not find the name of the director you provided in the database")
+  }
+}
+
+# Call function to ensure functionality
+verifyDirector("Aamir Khan")
+verifyDirector("Zain Awan")
+```
+

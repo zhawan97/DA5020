@@ -1,0 +1,7 @@
+"0","vorePercentage <- ms %>%"
+"0","  count(vore) %>%"
+"0","  mutate(proportion = n / sum(n)) %>%"
+"0","  select(vore, proportion)"
+"0",""
+"0","ggplot(vorePercentage, aes(x = vore, y = proportion)) + geom_bar(stat = ""identity"")"
+"0",""

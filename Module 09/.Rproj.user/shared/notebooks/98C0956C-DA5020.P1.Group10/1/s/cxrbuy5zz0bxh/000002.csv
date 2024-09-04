@@ -1,0 +1,7 @@
+"0","```r
+primary_substance_group_df <- admissions_df |> 
+  select(primary_substance_group) |> 
+  distinct() |> 
+  mutate(substance_code = str_extract(primary_substance_group, \"^[A-Z]\")) |> 
+  relocate(substance_code, .before = primary_substance_group)
+```"

@@ -1,0 +1,98 @@
+---
+title: "Assignment 05"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+## Question 1
+
+Load libraries and download xml file as senate.xml. The xml file is then converted into a dataframe with xmlToDataFrame(). The dataframe has 101 rows and 13 columns.
+```{r}
+library(tidyverse)
+library(RCurl)
+library(XML)
+library(xml2)
+library(readr)
+library(ggplot2)
+
+
+url <- "http://www.senate.gov/general/contact_information/senators_cfm.xml"
+download.file(url, destfile = "senate.xml")
+senate <- xmlToDataFrame("senate.xml")
+
+dim(senate)
+```
+
+
+## Question 2
+
+Use 3 regexs in 3 different columns to extract the required information. The regex also matches only the first word and will not match anything that comes after a name such as an initial or a Jr. The column is then updated with the string that the regex extraxted removing the unwanted suffixes. The names and party are then merged together into a new column using paste().
+```{r}
+senate$last_name <- str_extract(senate$last_name, "[A-Z][a-z]+")
+senate$first_name <- str_extract(senate$first_name, "[A-Z][a-z]+")
+senate$party <- str_extract(senate$party, "[DRI]")
+senate$full_and_party <- paste(senate$first_name,senate$last_name,senate$party)
+
+```
+
+
+## Question 3
+
+
+```{r}
+senatorsByState <- function(x) {
+  my_df <- senate %>%
+    filter(state == x) %>%
+    select(first_name,last_name,party, state) %>%
+    group_by(state)
+  str1 <- paste("The senators for", (x), "are: ")
+  str2 <- paste(my_df$first_name, my_df$last_name, recode(my_df$party, "D" = "Democratic Party", "R" = "Republican party", "I" = "Independent party"))
+  str3 <- str_c(str2, collapse = " and ")
+  statement <- str_c(str1, str3)
+  return(statement)
+}
+
+senatorsByState("MA")
+```
+
+
+## Question 4
+
+
+```{r}
+
+unemployment_df <- read_csv("unemployment.csv", skip = 4)
+
+country_name <- unemployment_df %>%
+  select(`Country Name`,`Country Code`)
+
+indicator_data <- unemployment_df %>%
+  pivot_longer(
+    cols = matches("[0-9]"),
+    names_to = "Year",
+    values_to = "Ratio"
+  ) %>%
+  select(`Country Code`,Year,Ratio)
+
+
+country_name
+indicator_data
+```
+
+
+## Question 5
+
+Countries Chosen:
+Israel, Japan, USA, Vietnam, Iraq
+From this data we can see that the ratio of male to female unemployment in Iraq has skyrocketed in comparison to the other countries which have remained flat, with the exception of Vietnam which had an increase in female unemployment before returning to the mean.
+```{r}
+df <- indicator_data %>%
+  filter(Year > 2003) %>%
+  filter(`Country Code` == "USA" | `Country Code` == "JPN" | `Country Code` == "IRQ" | `Country Code` == "VNM" | `Country Code` == "ISR")
+
+ggplot(df, aes(x = Year, y = Ratio, group = `Country Code`, color = `Country Code`)) +
+  geom_line() +
+  facet_wrap(~ `Country Code`)
+```

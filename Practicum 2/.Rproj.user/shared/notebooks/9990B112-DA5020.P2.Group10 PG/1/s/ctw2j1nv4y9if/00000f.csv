@@ -1,0 +1,5 @@
+"0","total_beds <- Reduce(function(x, y) merge(x, y, by = ""hospital_name"", all = TRUE), list(licensed_beds, census_beds, staffed_beds))"
+"0","total_beds$total_beds <- rowSums(total_beds[, c(""total_license_beds"", ""total_census_beds"", ""total_staffed_beds"")], na.rm = TRUE)"
+"0","total_beds_ranked <- total_beds[order(-total_beds$total_beds), c(""hospital_name"", ""total_beds"")]"
+"0",""
+"0","print(total_beds_ranked)"

@@ -1,0 +1,8 @@
+"0","# .open imdb.db"
+"0",""
+"0","# CREATE TABLE director_info ("
+"0","# Director_ID INTEGER PRIMARY KEY,"
+"0","#  Director_Name TEXT NOT NULL"
+"0","# );"
+"0",""
+"0","# .import directors.csv director_info --csv"

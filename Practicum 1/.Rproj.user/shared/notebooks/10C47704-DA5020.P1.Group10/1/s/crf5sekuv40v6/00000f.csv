@@ -1,0 +1,6 @@
+"0","program_category_df <- admissions_df |> "
+"0","  select(program_category) |> "
+"0","  distinct()|> "
+"0","  mutate(program_code = str_extract(program_category, ""^[A-Z][a-z]{1}""),"
+"0","         program_code = toupper(program_code)) |> "
+"0","  relocate(program_code, .before = program_category)"

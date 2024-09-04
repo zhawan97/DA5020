@@ -1,0 +1,4 @@
+"0","predictor_vars <- taxi_data |> "
+"0","  select(-c(VendorID, store_and_fwd_flag, ehail_fee, trip_type, tolls_amount))"
+"0",""
+"0","head(predictor_vars)"

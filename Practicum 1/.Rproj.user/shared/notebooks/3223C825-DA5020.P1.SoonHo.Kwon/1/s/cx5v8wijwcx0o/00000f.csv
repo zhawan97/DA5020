@@ -1,0 +1,15 @@
+"0","admissions_data <- admissions_df |> # Is this the correct way to select them or I could just mutate the columns with the other df"
+"0","  select(!c(county_of_program_location, program_category, primary_substance_group))"
+"0",""
+"0","admissions_df |> "
+"0","  mutate(if_else(program_category %in% program_category$program_category, program_category = program_category$program_code, ""-""))"
+"1","[1m[33mError[39m in `mutate()`:[22m
+[38;5;232m[36mℹ[38;5;232m In argument: `if_else(...)`.[39m
+[1mCaused by error in `if_else()`:[22m
+[38;5;232m[33m![38;5;232m `...` must be empty.
+[31m✖[38;5;232m Problematic argument:
+[36m•[38;5;232m program_category = program_category$program_code[39m
+Backtrace:
+[90m 1. [39m[1mdplyr[22m::mutate(...)
+[90m 8. [39m[1m[94mdplyr::if_else([39m[22m...[1m[94m)[39m[22m
+"

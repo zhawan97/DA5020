@@ -1,0 +1,5 @@
+"0",""
+"0","#With fare_amount"
+"0","tripdata_df %>%"
+"0","  select(fare_amount,trip_distance,trip_distance_z,fare_amount_z) %>%"
+"0","  filter(trip_distance_z > 2)"

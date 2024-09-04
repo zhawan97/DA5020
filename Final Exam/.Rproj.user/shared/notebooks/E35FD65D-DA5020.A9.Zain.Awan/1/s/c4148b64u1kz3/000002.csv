@@ -1,0 +1,14 @@
+"0","```r
+# Load libraries
+library(ggplot2)
+library(RCurl)
+library(tidyverse)
+library(stringr)
+
+# set url and destination file
+url <- \"https://data.sfgov.org/resource/rkru-6vcg.csv?$limit=35331\"
+
+traffic_df <- read.csv(url, stringsAsFactors = FALSE)
+
+head(traffic_df)
+```"

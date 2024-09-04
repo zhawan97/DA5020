@@ -1,0 +1,2 @@
+"0",""
+"0","ggplot(payment_type_proportions, aes(x=payment_type, y=payment_type_proportion)) + geom_bar(stat = ""identity"") + labs(title = ""Payment Type Proportions"", x = ""Payment Type"", y = ""Proportions"")"

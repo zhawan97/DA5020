@@ -1,0 +1,119 @@
+---
+title: "Assignment 07"
+author: "Zain Awan"
+output:
+  html_document:
+    df_print: paged
+---
+
+STEP 1: Get webpage via URL
+STEP 2: Parse HTML
+STEP 3: Extract leaf items
+STEP 4: Clean the extracted data
+
+
+Load Libraries
+```{r warning=FALSE}
+library(rvest)
+library(tidyverse)
+library(ggplot2)
+```
+
+# Question 1
+
+Utilize html_nodes to search the html and return trees with tables. This is then piped into html_tables() to convert the trees into dataframes. Because there is more than one table the function will return a list of tibbles so we must select the table we want with the statement pov_df <- tables[[1]]
+```{r}
+# Get HTML content from URL
+url <- "https://en.m.wikipedia.org/wiki/List_of_countries_by_percentage_of_population_living_in_poverty"
+wikipage <- read_html(url)
+
+# Parse HTML and convert to tibble
+tables <- html_nodes(wikipage, "table") %>% html_table()
+pov_df <- tables[[1]]
+
+# Convert column types to numeric
+pov_df$`$2.15` <- as.numeric(gsub("%","", pov_df$`$2.15`))
+pov_df$`$3.65` <- as.numeric(gsub("%","", pov_df$`$3.65`))
+pov_df$`$6.85` <- as.numeric(gsub("%","", pov_df$`$6.85`))
+pov_df
+```
+
+
+# Question 2
+
+The scatterplot shows that there are a large amount of countries who have low rates of poverty but have a high Gini Coefficient. This leads me to believe that this measurement of inequality does not work when investigating first world countries. I believe the thresholds for money spent per day would need to be higher for the measurement to be more accurate.
+In terms of third world countries, this analysis seems to produce the results we're expecting. The trend line shows that the Gini Coefficient increases as the poverty rate increases.
+```{r warning=FALSE, message=FALSE}
+# Calculate Gini Coefficient
+pov_df$Gini <- pov_df$`$2.15`/(pov_df$`$2.15` + (pov_df$`$3.65` + pov_df$`$6.85`))
+
+
+ggplot(pov_df, aes(x=`$2.15`, y = Gini)) + geom_point() + geom_smooth(method = "lm", se = FALSE) + labs(title = "Relationship between $2.15/day poverty rate and Gini Coefficient", x = "$2.15/day poverty rate", y = "Gini Coefficient") + theme_minimal()
+```
+
+
+# Question 3
+
+
+```{r}
+# Create list of European Countries
+europe <- c("Albania", "Austria", "Belgium", "Bulgaria", "Cyprus", "Denmark", "Estonia", "France", "Greece", "Iceland", "Italy", "Liechtenstein", "Luxembourg", "Moldova", "Montenegro", "North Macedonia", "Poland", "Romania", "San Marino", "Slovakia", "Spain", "Switzerland", "United Kingdom", "Andorra", "Belarus", "Bosnia and Herzegovina", "Croatia", "Czechia", "Finland", "Germany", "Hungary", "Ireland", "Latvia", "Lithuania", "Malta", "Monaco", "Netherlands", "Norway", "Portugal", "Russia", "Serbia", "Slovenia", "Sweden", "Ukraine")
+
+# Filter only European countries
+euro_df <- filter(pov_df, Country %in% europe)
+
+# Calculate means and create a dataframe to hold them
+Thresholds <- c("$2.15", "$3.65", "$6.85")
+x <- mean(euro_df$`$2.15`, na.rm = TRUE)
+y <- mean(euro_df$`$3.65`, na.rm = TRUE)
+z <- mean(euro_df$`$6.85`, na.rm = TRUE)
+means <- c(x,y,z)
+mean_df <- data.frame(Thresholds, means)
+
+ggplot(mean_df, aes(x=Thresholds, y=means)) + geom_bar(stat = "identity") + labs(x = "Poverty Thresholds", y = "Average(in percentage)", title = "Average Poverty Rates of European Countries")
+
+
+```
+
+# Question 4
+
+The data from the national poverty threshold table implies that poverty in first world countries is higher than the previous table suggested. Going off of dollar thresholds yields a much lower poverty rate. The data from WorldBank and Our World in Data shows that the poverty rate can be 15% in countries where people living on $6.85 a day is less than 1%. 
+Meanwhile countries that have the majority of people living with less than $6.85 a day somehow have a poverty rate much lower than this stat. For example in Bangladesh 83.1% of the people live on less than $6.85 a day but WorldBank says that only 18.7% of the people live in poverty.
+This disparity may be attributed to the different costs of living in many countries. For example, people living in first world countries may still be living in poverty even if they live on more than $6.85 a day while the people in third world countries might not be living in poverty even though they spend the same amount of money.
+```{r}
+# Get 2nd table from the tables list and select relevant columns
+nationalpov_df <- tables[[2]] %>%
+  select(Country,`WorldBank[2]`,`Our Worldin Data[9]`)
+
+# Merge both dataframes by Country
+merged_df <- full_join(pov_df,nationalpov_df, by = "Country")
+
+# Filter by 5 countries of my choice
+selected_df <- merged_df %>%
+  filter(Country %in% c("Bangladesh", "France", "Botswana", "Mexico", "Belarus")) %>%
+  select(Country, `$2.15`,`$3.65`, `$6.85`, `WorldBank[2]`, `Our Worldin Data[9]`)
+
+# Convert new data to numeric
+selected_df$`WorldBank[2]` <- as.numeric(gsub("%", "", selected_df$`WorldBank[2]`))
+selected_df$`Our Worldin Data[9]` <- as.numeric(gsub("%","", selected_df$`Our Worldin Data[9]`))
+
+selected_df
+```
+
+# Question 5
+
+The first plot is to illustrate the point I made in the last question. You can clearly see the disparity between the WorldBank poverty rate and the percent of people living with less than $6.85. This plot shows how low the poverty rate is in third world countries like Bangladesh despite the very small amount of money that people subsist on. This plot also shows that countries like France are much more expenisve to live in, which means the poverty line is much higher than $6.85 a day.
+
+The second plot shows the disparity between the percentage of people who spend $2.15 per day and people who spend $6.85 per day. This is a much more useful plot for gauging poverty in third world countries because the cost ofliving is so low. Of course this plot is useless when looking at first world countries. this plot shows that many people live with $6.85 or less per day in countries like Bangladesh and Botswana and are not considered living under the poverty line. Mexico is an interesting case because it is developing into a first world country and the poverty line is just above $6.85 spent per day.
+
+The last plot shows a bar graph where the percentage of people spending less than $3.65 per day is plotted against the poverty data from Our World in Data. I think this is the best plot for gauging how much money someone needs to spend per day before they are considered living in poverty.
+```{r}
+
+ggplot(selected_df, aes(x = Country)) + geom_col(aes(y = `WorldBank[2]`, fill = "orange")) + geom_col(aes(y = `$6.85`, fill = "blue")) + scale_fill_discrete(labels = c("$6.85", "WorldBank Poverty Line")) + labs(title = "Poverty rate vs. $6.85 Per Day", y = "Percent")
+
+ggplot(selected_df, aes(x=Country)) + geom_col(aes(y = `WorldBank[2]`, fill = "WorldBank")) + geom_col(aes(y = `$6.85`, fill = "$6.85")) + geom_col(aes(y = `$2.15`, fill = "$2.15")) + labs(title = "$2.15 vs $6.85 Per Day", y = "Percentage")
+
+ggplot(selected_df, aes(x = Country)) + geom_col(aes(y = `$3.65`, fill = "$3.65")) + geom_col(aes(y = `Our Worldin Data[9]`, fill = "OurWorldinData")) + labs(title = "$3.65 vs OurWorldinData", y="Percentage")
+```
+
+

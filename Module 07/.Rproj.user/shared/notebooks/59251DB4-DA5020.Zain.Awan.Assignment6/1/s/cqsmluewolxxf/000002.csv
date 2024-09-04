@@ -1,0 +1,30 @@
+"0","```r
+verifyDirector <- function(director_name) {
+  # Define query to check wheter the value exists or not
+  sqlString <- \"SELECT EXISTS ( 
+  SELECT name FROM director_info
+  WHERE name = :x
+  );\"
+  
+  sqlQuery <- dbSendQuery(db,sqlString)
+  dbBind(sqlQuery, params = list(x = director_name))
+  results <- dbFetch(sqlQuery)
+  
+  # Print result to console
+  if (results == TRUE) {
+    print(\"The name of the director you provided was found in the database\")
+  } else {
+    print(\"Did not find the name of the director you provided in the database\")
+  }
+}
+
+# Call function to ensure functionality
+verifyDirector(\"Aamir Khan\")
+```"
+"1","[1] \"The name of the director you provided was found in the database\"
+"
+"0","```r
+verifyDirector(\"Zain Awan\")
+```"
+"1","[1] \"Did not find the name of the director you provided in the database\"
+"

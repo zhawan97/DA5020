@@ -1,0 +1,14 @@
+"0","```r
+annualAdmissions <- function() {
+  admissions_df |>  # Maybe I'll have to change it to admissions_data ------------------------
+    group_by(year) |> 
+    summarise(admissions_per_year = n()) |> 
+    ggplot(aes(year, admissions_per_year)) + geom_line() +
+    geom_text(x = 2020.5, y = 6900, label = \"Max \n(year 2019)\", color = \"grey40\") +
+    geom_vline(xintercept = 2019, color = \"grey40\", linetype = 2) +
+    annotate(\"curve\", x = 2020.5, y = 6930, xend = 2019.2, yend = 6960, 
+             arrow = arrow(length = unit(0.2, \"cm\"), type = \"closed\"), color = \"grey40\") +
+    labs(title = \"Line chart of admissions per year\", x = \"Year\", y = \"Number of Admissions\",
+         caption = \"Visualization of admissions per year\") 
+}
+```"

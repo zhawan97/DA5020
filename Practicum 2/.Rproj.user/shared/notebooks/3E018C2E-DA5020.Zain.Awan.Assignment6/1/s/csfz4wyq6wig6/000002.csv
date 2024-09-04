@@ -1,0 +1,6 @@
+"0","```r
+# Define query to return the top 25 highest grossing movies in the dataset
+sqlCmd5 <- \"SELECT Series_Title, Genre, Gross FROM movie_info WHERE Gross IS NOT NULL ORDER BY Gross DESC LIMIT 25\"
+rs4 <- dbGetQuery(db, sqlCmd5)
+print(na.omit(rs4))
+```"

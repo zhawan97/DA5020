@@ -1,0 +1,10 @@
+"0","```r
+library(ggplot2)
+
+ggplot(mtcars, aes(x = wt, y = mpg, color = as.factor(cyl))) +
+  geom_point() +
+  labs(title = \"Scatterplot of MPG vs. Weight by # of Cylinders\",
+       x = \"Weight (1000 lbs\",
+       y = \"Miles per Gallon\",
+       color = \"# of Cylinders\")
+```"

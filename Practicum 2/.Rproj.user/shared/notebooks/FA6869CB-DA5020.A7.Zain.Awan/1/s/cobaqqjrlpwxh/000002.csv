@@ -1,0 +1,4 @@
+"0","```r
+
+ggplot(selected_df, aes(x = Country)) + geom_col(aes(y = `WorldBank[2]`, fill = \"orange\")) + geom_col(aes(y = `$6.85`, fill = \"blue\")) + scale_fill_discrete(labels = c(\"$6.85\", \"WorldBank Poverty Line\")) + labs(title = \"Poverty rate vs. $6.85 Per Day\", y = \"Percent\")
+```"

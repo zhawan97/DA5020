@@ -1,0 +1,3 @@
+"0","tripdata_df$trip_type <- factor(tripdata_df$trip_type)"
+"0","tripdata_df$payment_type <- factor(tripdata_df$payment_type)"
+"0","tripdata_df$PULocationID <- factor(tripdata_df$PULocationID)"

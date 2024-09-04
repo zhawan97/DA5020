@@ -1,0 +1,7 @@
+"0","# Top 10 by Staffed beds"
+"0","staffed_beds_df <- bed_business %>%"
+"0","  filter(bed_id == 4 | bed_id == 15) %>%"
+"0","  select(business_name, staffed_beds)"
+"0",""
+"0","top_staffed_beds <- head(staffed_beds_df[order(-staffed_beds_df$staffed_beds),], n = 10)"
+"0","top_staffed_beds"

@@ -1,0 +1,14 @@
+"0","# Adding URL to a variable"
+"0","file_url <- ""http://data.ny.gov/api/views/ngbt-9rwf/rows.xml"""
+"0",""
+"0","# Downloading file to admissions.xml"
+"0","download.file(file_url, destfile = ""admissions.xml"")"
+"2","trying URL 'http://data.ny.gov/api/views/ngbt-9rwf/rows.xml'
+"
+"2","downloaded 44.0 MB
+
+"
+"0","# Parsing XML file"
+"0","xmlfile <- xmlParse(""admissions.xml"")"
+"2","Error in xmlParse(""admissions.xml"") : could not find function ""xmlParse""
+"

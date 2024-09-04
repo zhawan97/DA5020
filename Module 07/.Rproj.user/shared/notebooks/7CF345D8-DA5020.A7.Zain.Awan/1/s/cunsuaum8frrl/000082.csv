@@ -1,0 +1,2 @@
+"0",""
+"0","ggplot(selected_df, aes(x=Country)) + geom_col(aes(y = `WorldBank[2]`, fill = ""WorldBank"")) + geom_col(aes(y = `$6.85`, fill = ""$6.85"")) + geom_col(aes(y = `$2.15`, fill = ""$2.15"")) + labs(title = ""$2.15 vs $6.85 Per Day"", y = ""Percentage"")"

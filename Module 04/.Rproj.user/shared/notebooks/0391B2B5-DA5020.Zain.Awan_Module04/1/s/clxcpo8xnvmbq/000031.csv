@@ -1,0 +1,19 @@
+"0","library(stringr)"
+"0","library(ggplot2)"
+"0","library(tidyverse)"
+"0",""
+"0",""
+"0","tripdata_df <- read_csv(""2020_Green_Taxi_Trip_Data.csv"", na = ""NA"")"
+"2","Warning: [38;5;232mOne or more parsing issues, call `problems()` on your data frame for details, e.g.:
+  dat <- vroom(...)
+  problems(dat)[39m"
+"2","[1mRows: [22m[34m398644[39m [1mColumns: [22m[34m20[39m"
+"2","[36m──[39m [1mColumn specification[22m [36m─────────────────────────────────────────────────────────────────────────────────────────[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m  (3): lpep_pickup_datetime, lpep_dropoff_datetime, store_and_fwd_flag
+[32mdbl[39m (16): VendorID, RatecodeID, PULocationID, DOLocationID, passenger_count, trip_distance, fare_amount, extr...
+[33mlgl[39m  (1): ehail_fee"
+"2","
+[36mℹ[39m Use `spec()` to retrieve the full column specification for this data.
+[36mℹ[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."
+"0","as_tibble(tripdata_df)"

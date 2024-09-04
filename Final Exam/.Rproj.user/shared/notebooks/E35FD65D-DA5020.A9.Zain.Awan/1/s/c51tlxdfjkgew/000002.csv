@@ -1,0 +1,44 @@
+"0","```r
+# Exponential Smoothing with alpha = 0.7 and data starting from 2008 to 2018
+a <- 0.7
+df <- passenger_counts %>%
+  filter(activity_period > 200800 & activity_period < 201900)
+df$activity_period <- as.numeric(df$activity_period)
+df$total_passengers <- as.numeric(df$total_passengers)
+
+# convert from tibble to regular dataframe. Tibble is incompatable with analysis below because new columns are created with class list
+df <- as.data.frame(df)
+
+# Initialize forecast and error columns
+df$Ft <- 0
+df$E <- 0
+df$Ft[1] <- df[1,2]
+
+# Loop through to build model
+for (i in 2:nrow(df)) {
+  df$Ft[i] <- as.numeric(df$Ft[i-1]) + as.numeric(a*df$E[i-1])
+  df$E[i] <- abs(df[i,2] - df$Ft[i])
+}
+
+# Calculate MSE for exponential smoothing model
+error_means <- mean(df$E)
+MSE_1 <- (error_means)^2
+
+# Simple Linear Regression from 2008 to 2018
+df <- passenger_counts %>%
+  filter(activity_period > 200800) %>%
+  filter(activity_period < 201900)
+
+model <- lm(df$total_passengers ~ df$activity_period)
+
+# Calculate MSE for Simple Linear Regression model
+MSE_2 <- mean((model$residuals)^2)
+print(MSE_1)
+```"
+"1","[1] 34073431426
+"
+"0","```r
+print(MSE_2)
+```"
+"1","[1] 16229989655
+"

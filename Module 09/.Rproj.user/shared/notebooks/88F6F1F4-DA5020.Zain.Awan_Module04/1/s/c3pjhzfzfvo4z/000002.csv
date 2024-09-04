@@ -1,0 +1,9 @@
+"0","```r
+pickup_count <- tripdata_df %>%
+  mutate(dt = mdy_hms(tripdata_df$lpep_pickup_datetime)) %>%
+  mutate(day = day(dt)) %>% 
+  select(day) %>%
+  count(day)
+
+ggplot(pickup_count, aes(x=day, y=n)) + geom_bar(stat = \"identity\") + labs(title=\"Pickup Frequency\", x = \"day\", y = \"count\")
+```"

@@ -1,0 +1,4 @@
+"0",""
+"0","#Remove tip_amount outliers"
+"0","tripdata_df <- tripdata_df %>%"
+"0","  filter(tip_z < 3)"

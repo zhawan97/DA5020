@@ -1,0 +1,6 @@
+"0","# Hospitals that have ICU beds"
+"0","icu_beds <- bed_business |> "
+"0","  filter(bed_id == 4) |> "
+"0","  select(business_name, bed_id, license_beds, census_beds, staffed_beds)"
+"0",""
+"0","head(icu_beds)"

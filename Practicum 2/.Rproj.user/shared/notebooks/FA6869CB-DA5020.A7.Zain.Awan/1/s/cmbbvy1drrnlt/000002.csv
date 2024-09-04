@@ -1,0 +1,27 @@
+"0","```r
+# Get HTML content from UR
+url <- \"https://en.m.wikipedia.org/wiki/List_of_countries_by_percentage_of_population_living_in_poverty\"
+wikipage <- read_html(url)
+
+# Parse HTML and convert to tibble
+tables <- html_nodes(wikipage, \"table\") %>% html_table()
+pov_df <- tables[[1]]
+
+# Convert column types to numeric
+pov_df$`$2.15` <- as.numeric(gsub(\"%\",\"\", pov_df$`$2.15`))
+```"
+"1","Warning: NAs introduced by coercion
+"
+"0","```r
+pov_df$`$3.65` <- as.numeric(gsub(\"%\",\"\", pov_df$`$3.65`))
+```"
+"1","Warning: NAs introduced by coercion
+"
+"0","```r
+pov_df$`$6.85` <- as.numeric(gsub(\"%\",\"\", pov_df$`$6.85`))
+```"
+"1","Warning: NAs introduced by coercion
+"
+"0","```r
+pov_df
+```"

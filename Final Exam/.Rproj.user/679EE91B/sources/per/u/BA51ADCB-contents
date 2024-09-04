@@ -1,0 +1,64 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+data <- read_csv("Ravix Chart Data.csv")
+
+data[] <- lapply(data, function(x) gsub("\\$", "", x))
+data[] <- lapply(data, function(x) gsub(",", "", x))
+
+data <- data %>%
+  mutate(total_n = as.numeric(Total)) %>%
+  mutate(period_n = as.numeric(Period))
+
+model <- lm(total_n ~ period_n, data = data)
+
+mse <- mean((model$residuals ^ 2))
+mse
+```
+
+```{r}
+# Provided values
+sst <- 1126.05
+sse <- 307.88
+
+# Calculate R-squared
+r_squared <- 1 - (sse / sst)
+
+# Round to two decimal places
+r_squared <- round(r_squared, 2)
+
+# Print the R-squared value
+print(r_squared)
+
+
+```
+
+
+```{r}
+# Load the mtcars dataset
+data(mtcars)
+
+# Construct the correlation matrix
+correlation_matrix <- round(cor(mtcars), 2)
+
+# Exclude diagonal elements (correlation of each variable with itself)
+diag(correlation_matrix) <- NA
+
+# Find the indices of the maximum correlation
+max_corr_index <- which(correlation_matrix == max(correlation_matrix, na.rm = TRUE), arr.ind = TRUE)
+
+# Extract column names and correlation coefficient
+variable1 <- rownames(correlation_matrix)[max_corr_index[1]]
+variable2 <- colnames(correlation_matrix)[max_corr_index[2]]
+max_corr <- correlation_matrix[max_corr_index[1], max_corr_index[2]]
+
+# Print the results
+cat("The strongest correlation is observed between", variable1, "and", variable2, "with an R =", max_corr)
+
+```
+

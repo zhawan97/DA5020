@@ -1,0 +1,23 @@
+"0","```r
+library(tidyverse)
+library(RCurl)
+library(XML)
+library(xml2)
+library(readr)
+library(ggplot2)
+
+
+url <- \"http://www.senate.gov/general/contact_information/senators_cfm.xml\"
+download.file(url, destfile = \"senate.xml\")
+```"
+"1","trying URL 'http://www.senate.gov/general/contact_information/senators_cfm.xml'
+Content type 'text/xml' length 52649 bytes (51 KB)
+downloaded 51 KB
+"
+"0","```r
+senate <- xmlToDataFrame(\"senate.xml\")
+
+dim(senate)
+```"
+"1","[1] 101  13
+"

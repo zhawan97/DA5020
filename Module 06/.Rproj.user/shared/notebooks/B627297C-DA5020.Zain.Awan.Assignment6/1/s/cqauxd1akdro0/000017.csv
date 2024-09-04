@@ -1,0 +1,5 @@
+"0","# Define query which joins the 2 tables together and returns the directors with the highest grossing movies"
+"0","sqlCmd6 <- ""SELECT name, Gross FROM director_info JOIN movie_info ON director_info.Director_ID = movie_info.Director_ID ORDER BY Gross ASC"""
+"0","rs5 <- dbGetQuery(db,sqlCmd6)"
+"2","Warning: Column `Gross`: mixed type, first seen values of type real, coercing other values of type string"
+"0","print(rs5)"

@@ -1,0 +1,7 @@
+"0","icu_sicu_hospitals |> "
+"0","  select(business_name, bed_id_icu, staffed_beds_icu,"
+"0","         bed_id_sicu, staffed_beds_sicu) |> "
+"0","  mutate(total_icu_sicu_staffed_beds = staffed_beds_icu + staffed_beds_sicu) |> "
+"0","  arrange(desc(total_icu_sicu_staffed_beds)) |> "
+"0","  relocate(total_icu_sicu_staffed_beds, .after = business_name) |> "
+"0","  head(n = 10)"

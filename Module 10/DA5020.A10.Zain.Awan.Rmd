@@ -1,0 +1,153 @@
+---
+title: "Assignment 10"
+author: "Zain Awan"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Note On Tardiness
+
+This assignment was submitted late due to a 5 day military training event. I had asked the professor for an extension a week before the assignment was due. Please do not apply the late penalty when grading this assignment.
+
+
+# Question 1
+
+```{r warning=FALSE, message=FALSE}
+# Load libraries and datasets
+library(openintro)
+library(psych)
+library(dplyr)
+data(ncbirths)
+```
+
+## Confidence Interval
+A confidence interval may be conceptualized as a type of margin of error in the world of statistics. For example, if we say that we have a CI of 95% we are saying that the proportion of the data is innacurate or an outlier is equal to 5%. This is typically the 2.5% top and bottom values.
+
+## Prediction Interval
+A prediction interval assigns the probability that a future observtion will be a certain value based on previous observations. The value in a prediction interval is also normally a range of values. As an example we would say something like we are 95% confident the next value will be in the range of [1:10].
+
+
+# Quetion 2
+
+cor() only accepts values of type numeric so we must convert them. Thankfully the columns are categorical data that is easily converted.
+```{r warning=FALSE, message=FALSE}
+ncbirths <- ncbirths %>%
+  mutate(premie_numeric = ifelse(premie == "premie", 0,1)) %>% # fullterm = 1
+  mutate(mature_nuneric = ifelse(mature == "mature", 1,0)) %>% # mature = 1
+  mutate(marital_numeric = ifelse(marital == "married", 1, 0)) %>% # married = 1
+  mutate(lowbirthweight_numeric = ifelse(lowbirthweight == "low", 1,0)) %>% # low = 1
+  mutate(gender_numeric = ifelse(gender == "male", 1,0)) %>% # male = 1
+  mutate(habit_numeric = ifelse(habit == "smoker", 1,0)) %>% # smoker = 1
+  mutate(whitemom_numeric = ifelse(whitemom == "white", 1,0)) # whitemom = 1
+
+ncbirths_numeric <- ncbirths %>%
+  select(fage,mage,weeks,visits,gained,weight,premie_numeric,marital_numeric,mature_nuneric,lowbirthweight_numeric,gender_numeric,habit_numeric,whitemom_numeric)
+
+# use = pairwise.complete.obs to remove NA values
+cor(ncbirths_numeric, use = "pairwise.complete.obs")
+# Create paired correlation plots to visualize the data
+pairs.panels(ncbirths_numeric, use = "pairwise.complete.obs")
+```
+
+## Distribution
+
+Father Age: Right skew. Majority of fathers tend to be younger and a few older fathers are increasing the mean.  
+Mother Age: Right skew. Majority of mothers tend to be younger and a few older mothers are increasing the mean.  
+Weeks: Left skew. Majority of births tend to take place after 30 weeks.  
+Visits: Normal distributiion.  
+Gained: Right skew. The amount of weight gained during pregnancy is not that much.  
+Weight: Left skew. Low weight babies from premature births lower the mean.  
+Premie: Majority of births occur after a full term pregnancy.  
+Marital: Majority of births occur from married couples.  
+Low Birth Weight: Majority of babies are not born with low weight.  
+Gender: Evenly distributed.  
+Habit: Majority of mothers are non smokers.  
+White Mom: Majority of mothers are white.  
+
+## Multicolinearity
+
+Since we are building a model that predicts the baby's weight we should see what variables correlate with weight.
+Weight positively correlates with weeks of pregnancy, and the premie_numeric value. A premie equal to 1 means it was a full term pregnancy, which means weight positively correlates with full term pregnancy.  
+Weight also negatively correlates with lowbirthweight_numeric. A value of 1 means low birth weight which explains why the correlation is negative. I believe that the weeks and premie variables are not a source of multicolinearity because they basically describe the same thing. The variable low birth weight should be removed because it is the categorical version of the weight variable. There are variables that I think will not be useful for the model such as visits.
+
+
+# Question 3
+
+From the summary below the model to predict the weight of a baby is:
+weight = -4.61 + 0(fage) + 0(mage) + 0.26(weeks) + 0(visits) + 0(gained) + 0.61(premie_numeric) + 0.21(marital) + 0.39(gender) - 0.30(habit) + 0.29(whitemom)
+```{r}
+m <- lm(weight ~ fage+mage+weeks+visits+gained+premie_numeric+marital_numeric+gender_numeric+habit_numeric+whitemom_numeric, data = ncbirths_numeric)
+summary(m)
+```
+
+R squared - 0.4643  
+This is not the strongest R squared vlue. Basically, only 46% of the variability is explained by the variables in the model.  
+p-value - 2.2e-16  
+This is a very low p value which means our model is statistically significant.  
+Standard Error - 1.061  
+Not very high standard error. This sample likely reflects the population very well.  
+  
+p-values of coefficients:  
+There were only 3 coefficients with a p-value > 0.05. Those are father age, mother age, and visits. These variables are not good predictors for a baby's weight at birth.  
+
+
+# Question 4
+
+
+## Step 1
+```{r}
+# Eliminate mage because it has the highest p-value of 0.79
+m <- lm(weight ~ fage+weeks+visits+gained+premie_numeric+marital_numeric+gender_numeric+habit_numeric+whitemom_numeric, data = ncbirths_numeric)
+summary(m)
+```
+The R squared did not improve so we will eliminate another variable
+
+## Step 2
+
+```{r}
+# Eliminate visits because of high p-value of 0.64
+m <- lm(weight ~ fage+weeks+gained+premie_numeric+marital_numeric+gender_numeric+habit_numeric+whitemom_numeric, data = ncbirths_numeric)
+summary(m)
+```
+The R squared improved marginally so we will eliminate another variable.
+
+## Step 3
+
+```{r}
+# Eliminate fage because of high p-value of 0.23
+m <- lm(weight ~ weeks+gained+premie_numeric+marital_numeric+gender_numeric+habit_numeric+whitemom_numeric, data = ncbirths_numeric)
+summary(m)
+```
+The R squared improved, but not by much. All of the coefficients are statistcally significant now, so we will not remove anymore variables.
+
+
+## Question 5
+
+Final model: weight = -4.87+0.28(weeks)+0.008(gained)+0.52(premie)+0.24(marital)+0.39(gender)-0.38(habit) + 0.22(whitemom)
+
+```{r}
+# Extract mean from fitted model
+fm <- fitted(m)
+mean_m <- mean(fm)
+# Plug values into model
+weight = -4.87+(0.28*42)+(0.008*22)+(0.52*1)+(0.24*1)+(0.39*0)-(0.38*0) + (0.22*1)
+print(weight)
+
+# PI calculation
+top <- 8.046 + (1.96*1.064)
+bot <- 8.046 - (1.96*1.064)
+print(top)
+print(bot)
+
+# CI calculation using the mean
+
+top <- mean_m + (1.96*1.064)
+bot <- mean_m - (1.96*1.064)
+print(mean_m)
+print(top)
+print(bot)
+```
+
+The 95% PI for this prediction is between 5.96 and 10.13.  
+The 95% Ci for this model is between 5.01 and 9.19

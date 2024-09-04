@@ -1,0 +1,19 @@
+"0","```r
+# Get 2nd table from the tables list and select relevant columns
+nationalpov_df <- tables[[2]] %>%
+  select(Country,`WorldBank[2]`,`Our Worldin Data[9]`)
+
+# Merge both dataframes by Country
+merged_df <- full_join(pov_df,nationalpov_df, by = \"Country\")
+
+# Filter by 5 countries of my choice
+selected_df <- merged_df %>%
+  filter(Country %in% c(\"Bangladesh\", \"France\", \"Botswana\", \"Mexico\", \"Belarus\")) %>%
+  select(Country, `$2.15`,`$3.65`, `$6.85`, `WorldBank[2]`, `Our Worldin Data[9]`)
+
+# Convert new data to numeric
+selected_df$`WorldBank[2]` <- as.numeric(gsub(\"%\", \"\", selected_df$`WorldBank[2]`))
+selected_df$`Our Worldin Data[9]` <- as.numeric(gsub(\"%\",\"\", selected_df$`Our Worldin Data[9]`))
+
+selected_df
+```"

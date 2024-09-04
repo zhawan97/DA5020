@@ -1,0 +1,5 @@
+"0",""
+"0","#trip_distance"
+"0","tripdata_df %>%"
+"0","  select(trip_distance,trip_distance_z) %>%"
+"0","  filter(trip_distance_z > 3)"

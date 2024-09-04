@@ -1,0 +1,16 @@
+"0","```r
+
+admissions_program_plot <- ggplot(admissions_by_program, aes(x = program_category, y = admissions)) + geom_bar(stat = \"identity\") + labs(x = \"Program Category\", y = \"Admissions\", title = \"Admissions by Program\")
+
+
+# PRIMARY SUBSTANCE ANALYSIS
+
+admissions_by_substance <- admissions_df %>%
+  group_by(primary_substance_group) %>%
+  select(primary_substance_group,admissions) %>%
+  arrange(primary_substance_group, .locale = \"en\")
+
+admissions_by_substance %>%
+  count(primary_substance_group, wt = admissions) %>%
+  arrange(primary_substance_group, .locale = \"en\")
+```"

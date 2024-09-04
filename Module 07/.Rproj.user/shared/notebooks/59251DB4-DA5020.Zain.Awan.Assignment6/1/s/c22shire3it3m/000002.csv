@@ -1,0 +1,8 @@
+"0","```r
+#Define query that fetches only the movies released between 2010 and 2020
+sqlCmd3 <- \"SELECT * FROM movie_info WHERE Release_Year >= :x AND Release_Year <= :y\"
+query <- dbSendQuery(db, sqlCmd3)
+dbBind(query, params = list(x=2010,y=2020)) # Define parameters x=2010 and y=2020
+rs2 = dbFetch(query)
+print(rs2)
+```"

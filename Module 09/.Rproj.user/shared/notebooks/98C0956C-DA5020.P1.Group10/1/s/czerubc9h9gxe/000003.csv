@@ -1,0 +1,15 @@
+"0","```r
+
+admissions_county_plot <- ggplot(admissions_by_county, aes(x = county_of_program_location, y = admissions)) + geom_bar(stat = \"identity\") + labs(x = \"County\", y = \"Admissions\", title = \"Admissions By County\") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# AGE GROUP ANALYSIS
+
+admissions_by_age <- admissions_df %>%
+  group_by(age_group) %>%
+  select(age_group,admissions) %>%
+  arrange(age_group, .locale = \"en\")
+
+admissions_by_age %>%
+  count(age_group) %>%
+  arrange(age_group, .locale = \"en\")
+```"

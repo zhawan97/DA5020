@@ -1,0 +1,5 @@
+"0","# Top 10 by Census beds"
+"0","census_beds_df <- bed_business %>%"
+"0","  filter(bed_id == 4 | bed_id == 15) %>%"
+"0","  select(business_name, census_beds)"
+"0","head(census_beds_df[order(-census_beds_df$census_beds),], n = 10)"

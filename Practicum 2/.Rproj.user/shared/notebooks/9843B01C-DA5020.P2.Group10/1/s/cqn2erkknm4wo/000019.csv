@@ -1,0 +1,5 @@
+"0",""
+"0","# Select the 3 fact columns and print them"
+"0","factsonly_df <- bedfact_df %>%"
+"0","  select(license_beds,census_beds,staffed_beds)"
+"0","print(factsonly_df)"

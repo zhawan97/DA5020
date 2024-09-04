@@ -1,0 +1,26 @@
+"0","library(tidyverse)"
+"0","library(RCurl)"
+"0","library(XML)"
+"0","library(xml2)"
+"0","library(readr)"
+"0","library(ggplot2)"
+"0",""
+"0",""
+"0","url <- ""http://www.senate.gov/general/contact_information/senators_cfm.xml"""
+"0","download.file(url, destfile = ""senate.xml"")"
+"2","trying URL 'http://www.senate.gov/general/contact_information/senators_cfm.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 52649 bytes (51 KB)
+"
+"2","downloaded 51 KB
+
+"
+"0","senate <- xmlToDataFrame(""senate.xml"")"
+"0",""
+"0","dim(senate)"
+"1","[1]"
+"1"," 101"
+"1","  13"
+"1","
+"

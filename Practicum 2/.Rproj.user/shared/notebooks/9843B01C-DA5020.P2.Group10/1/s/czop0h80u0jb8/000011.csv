@@ -1,0 +1,7 @@
+"0",""
+"0","# Hospitals that have SICU beds"
+"0","sicu_beds <- bed_business |> "
+"0","  filter(bed_id == 15) |> "
+"0","  select(business_name, bed_id, license_beds, census_beds, staffed_beds)"
+"0",""
+"0","head(sicu_beds)"

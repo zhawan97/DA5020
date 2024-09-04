@@ -1,0 +1,14 @@
+"0","```r
+county <- admissions_df |> 
+  select(county_of_program_location) |>
+  distinct() |> 
+  mutate(county_code = c(\"AL\", \"AG\", \"NY\", \"BM\", \"CA\", \"CY\", \"CH\", \"CM\",
+                         \"CN\", \"CL\", \"CO\", \"CR\", \"DE\", \"DU\", \"ER\", \"ES\",
+                         \"FR\", \"FU\", \"GE\", \"GR\", \"HE\", \"JE\", \"NY\", \"LE\", 
+                         \"LI\", \"MA\", \"MO\", \"MG\", \"NA\", \"NY\", \"NI\", \"ON\",
+                         \"OD\", \"OT\", \"OR\", \"OL\", \"OS\", \"OG\", \"PU\", \"NY\",
+                         \"RE\", \"NY\", \"RO\", \"SL\", \"SA\", \"SC\", \"SH\", \"SY\",
+                         \"SE\", \"ST\", \"SU\", \"SV\", \"TI\", \"TO\", \"UL\", \"WR\",
+                         \"WS\", \"WA\",\"WE\", \"WY\", \"YA\")) |> 
+  relocate(county_code, .before = county_of_program_location)
+```"

@@ -1,0 +1,8 @@
+"0","# License beds that have both ICU and SICU"
+"0","icu_sicu_hospitals |> "
+"0","  select(business_name, bed_id_icu, license_beds_icu,"
+"0","         bed_id_sicu, license_beds_sicu) |> "
+"0","  mutate(total_icu_sicu_license_beds = license_beds_icu + license_beds_sicu) |> "
+"0","  arrange(desc(total_icu_sicu_license_beds)) |> "
+"0","  relocate(total_icu_sicu_license_beds, .after = business_name) |> "
+"0","  head(n = 10)"

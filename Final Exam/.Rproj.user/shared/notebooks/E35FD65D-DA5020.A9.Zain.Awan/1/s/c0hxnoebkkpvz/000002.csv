@@ -1,0 +1,17 @@
+"0","```r
+# Simple moving average. Get data from 2016 to 2018
+periods <- c(as.numeric(passenger_counts[17,2]),as.numeric(passenger_counts[18,2]),as.numeric(passenger_counts[19,2]))
+SMA <- mean(last3, trim = 0)
+print(SMA)
+```"
+"1","[1] 4382334
+"
+"0","```r
+# Calculate error
+Mar2019 <- as.numeric(passenger_counts[20,2])
+error <- abs(Mar2019-SMA)
+percent_error <- error/Mar2019 * 100
+print(percent_error)
+```"
+"1","[1] 4.715078
+"

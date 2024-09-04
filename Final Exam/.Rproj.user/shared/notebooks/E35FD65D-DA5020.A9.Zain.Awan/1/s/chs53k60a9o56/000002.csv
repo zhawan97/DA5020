@@ -1,0 +1,16 @@
+"0","```r
+# Wighted moving average. Set weights to be 3, 5, and 7 for the years 2016, 2017, and 2018
+weights <- c(3,5,7)
+product <- weights * periods
+WMA <- sum(product)/sum(weights)
+print(WMA)
+```"
+"1","[1] 4453848
+"
+"0","```r
+error <- abs(Mar2019-WMA)
+percent_error <- error/Mar2019 * 100
+print(percent_error)
+```"
+"1","[1] 3.160148
+"
